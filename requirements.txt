@@ -1,0 +1,5 @@
+streamlit 
+scikit-learn 
+beautifulsoup4 
+pypdf 
+google-generativeai

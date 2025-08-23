@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Student Number – 720017170">
+
+<title>Predicting Loan Defaults: A Data-Driven Approach to Credit Risk Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="Blog_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Blog_files/libs/quarto-html/quarto.js"></script>
+<script src="Blog_files/libs/quarto-html/popper.min.js"></script>
+<script src="Blog_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Blog_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Blog_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Blog_files/libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Blog_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Blog_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Blog_files/libs/bootstrap/bootstrap-0e8d46d49afdcf27eef7cf8bb79e73b3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Predicting Loan Defaults: A Data-Driven Approach to Credit Risk Analysis</h1>
+            <p class="subtitle lead">BEE2041 Data Science in Economics – Empirical Project</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Student Number – 720017170 </p>
+            </div>
+    </div>
+      
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-predicting-defaults-matters-more-than-ever" id="toc-why-predicting-defaults-matters-more-than-ever" class="nav-link active" data-scroll-target="#why-predicting-defaults-matters-more-than-ever"><strong>1. Why Predicting Defaults Matters More Than Ever</strong></a></li>
+  <li><a href="#exploring-risk-from-patterns-to-causal-effects" id="toc-exploring-risk-from-patterns-to-causal-effects" class="nav-link" data-scroll-target="#exploring-risk-from-patterns-to-causal-effects"><strong>2. Exploring Risk: From Patterns to Causal Effects</strong></a>
+  <ul class="collapse">
+  <li><a href="#getting-to-know-the-data-patterns-quality-and-first-impressions" id="toc-getting-to-know-the-data-patterns-quality-and-first-impressions" class="nav-link" data-scroll-target="#getting-to-know-the-data-patterns-quality-and-first-impressions"><strong>2.1 Getting to Know the Data: Patterns, Quality, and First Impressions</strong></a></li>
+  <li><a href="#how-the-data-behaves-exploring-distributions" id="toc-how-the-data-behaves-exploring-distributions" class="nav-link" data-scroll-target="#how-the-data-behaves-exploring-distributions"><strong>2.2 How the Data Behaves: Exploring Distributions</strong></a></li>
+  <li><a href="#detecting-relationships-and-multicollinearity-among-variables" id="toc-detecting-relationships-and-multicollinearity-among-variables" class="nav-link" data-scroll-target="#detecting-relationships-and-multicollinearity-among-variables"><strong>2.3 Detecting Relationships and Multicollinearity Among Variables</strong></a></li>
+  <li><a href="#moving-beyond-correlation-searching-for-causality" id="toc-moving-beyond-correlation-searching-for-causality" class="nav-link" data-scroll-target="#moving-beyond-correlation-searching-for-causality"><strong>2.4 Moving Beyond Correlation: Searching for Causality</strong></a></li>
+  </ul></li>
+  <li><a href="#can-machines-predict-who-defaults" id="toc-can-machines-predict-who-defaults" class="nav-link" data-scroll-target="#can-machines-predict-who-defaults"><strong>3. Can Machines Predict Who Defaults?</strong></a>
+  <ul class="collapse">
+  <li><a href="#machine-learning-in-action-lr-rf-and-xgboost" id="toc-machine-learning-in-action-lr-rf-and-xgboost" class="nav-link" data-scroll-target="#machine-learning-in-action-lr-rf-and-xgboost"><strong>3.1 Machine Learning in Action: LR, RF, and XGBoost</strong></a></li>
+  <li><a href="#which-model-learns-best-comparing-lr-rf-xgboost" id="toc-which-model-learns-best-comparing-lr-rf-xgboost" class="nav-link" data-scroll-target="#which-model-learns-best-comparing-lr-rf-xgboost"><strong>3.2 Which Model Learns Best? Comparing LR, RF &amp; XGBoost</strong></a></li>
+  <li><a href="#who-gets-a-fair-deal-auditing-xgboosts-default-predictions" id="toc-who-gets-a-fair-deal-auditing-xgboosts-default-predictions" class="nav-link" data-scroll-target="#who-gets-a-fair-deal-auditing-xgboosts-default-predictions"><strong>3.3 Who Gets a Fair Deal? Auditing XGBoost’s Default Predictions</strong></a></li>
+  <li><a href="#from-models-to-meaning-what-we-can-learn" id="toc-from-models-to-meaning-what-we-can-learn" class="nav-link" data-scroll-target="#from-models-to-meaning-what-we-can-learn"><strong>3.4 From Models to Meaning: What We Can Learn</strong></a></li>
+  </ul></li>
+  <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways"><strong>4. Key Takeaways</strong></a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><strong>5. References</strong></a></li>
+  </ul>
+</nav>
+</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<div style="display: flex; justify-content: flex-start; gap: 1em; margin-top: 0em;">
+<!-- GitHub -->
+<p><a href="https://github.com/JoshLG18" target="_blank"> <img src="Image/github.png" alt="GitHub" width="50" height="50"> </a></p>
+<!-- LinkedIn -->
+<p><a href="https://www.linkedin.com/in/josh-le-grice-aa0223261/" target="_blank"> <img src="Image/linkedin.png" alt="LinkedIn" width="50" height="50"> </a></p>
+<!-- Download Dataset -->
+<p><a href="data/credit_risk_dataset.csv" download="" title="Download Dataset"> <img src="Image/dataset.png" alt="Download Dataset" width="50" height="50"> </a></p>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Image/banner.jpg" style="width:100.0%" height="200" class="figure-img"></p>
+<figcaption>Image from: https://www.indusind.com/iblogs/personal-loan/how-to-make-sure-your-personal-loan-application-gets-approved/</figcaption>
+</figure>
+</div>
+<section id="why-predicting-defaults-matters-more-than-ever" class="level2">
+<h2 class="anchored" data-anchor-id="why-predicting-defaults-matters-more-than-ever"><strong>1. Why Predicting Defaults Matters More Than Ever</strong></h2>
+<p>Access to credit plays a big role in helping people grow businesses, buy property, or manage unexpected costs. But from the lender’s side, it comes with risk. If a borrower defaults, it can lead to major losses. That’s why being able to accurately predict who’s likely to default is so important. Traditional credit scoring has been the standard, but more recently, machine learning (ML) has shown it can do a better job at making these types of predictions <span class="citation" data-cites="Yang:2024">(<a href="#ref-Yang:2024" role="doc-biblioref">Yang, 2024</a>)</span>.</p>
+<p>This project uses real-world loan data to compare the performance of three models: Logistic Regression (LR), Random Forest (RF), and XGBoost. Each model is tested using accuracy, precision, recall, F1-score, and area under the curve (AUC). These metrics help assess how well the models identify defaulters and how reliable their predictions are overall <span class="citation" data-cites="Saito:2015">(<a href="#ref-Saito:2015" role="doc-biblioref">Saito &amp; Rehmsmeier, 2015</a>)</span>.</p>
+<p>The project also looks at fairness across different borrower groups to see if the models are biased towards or against certain types of applicants. Combining ML with causal analysis, it aims to give a deeper, more balanced view of credit risk prediction.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="exploring-risk-from-patterns-to-causal-effects" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-risk-from-patterns-to-causal-effects"><strong>2. Exploring Risk: From Patterns to Causal Effects</strong></h2>
+<p>Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle <span class="citation" data-cites="Tse:2020">(<a href="#ref-Tse:2020" role="doc-biblioref">Tse, 2020</a>)</span>, consisting of 12 variables/columns and 32580 observations, illustrated in Table 1.</p>
+<section id="getting-to-know-the-data-patterns-quality-and-first-impressions" class="level3">
+<h3 class="anchored" data-anchor-id="getting-to-know-the-data-patterns-quality-and-first-impressions"><strong>2.1 Getting to Know the Data: Patterns, Quality, and First Impressions</strong></h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">2.1.1 Variable Information</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">2.1.2 Summary Statistics</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="7">
+<table class="dataframe table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true" data-border="1">
+<caption>Table 1: Variable Information</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Variable</th>
+<th data-quarto-table-cell-role="th">Data Type</th>
+<th data-quarto-table-cell-role="th">Definition</th>
+<th data-quarto-table-cell-role="th">Missing Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PersonAge</td>
+<td>int64</td>
+<td>Age of the borrower</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>PersonIncome</td>
+<td>int64</td>
+<td>Income of the borrower</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>PersonHomeOwnership</td>
+<td>object</td>
+<td>Home ownership of the borrower</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>PersonEmpLength</td>
+<td>float64</td>
+<td>Employment length of the borrower</td>
+<td>887</td>
+</tr>
+<tr class="odd">
+<td>LoanIntent</td>
+<td>object</td>
+<td>Intention of the loan</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>LoanGrade</td>
+<td>object</td>
+<td>Loan grade</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>LoanAmnt</td>
+<td>int64</td>
+<td>Amount of the loan (USD)</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>LoanIntRate</td>
+<td>float64</td>
+<td>Loan interest rate</td>
+<td>3095</td>
+</tr>
+<tr class="odd">
+<td>LoanStatus</td>
+<td>int64</td>
+<td>Loan status (0 – not defaulted, 1 – defaulted)</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>LoanPercentIncome</td>
+<td>float64</td>
+<td>Loan percentage of income</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>PreviousDefault</td>
+<td>object</td>
+<td>If the borrower has defaulted before</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>CredHistory</td>
+<td>int64</td>
+<td>Credit history length</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="8">
+<table class="dataframe table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true" data-border="1">
+<caption>Table 2: Summary Statistics</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Variable</th>
+<th data-quarto-table-cell-role="th">N</th>
+<th data-quarto-table-cell-role="th">Mean</th>
+<th data-quarto-table-cell-role="th">Median</th>
+<th data-quarto-table-cell-role="th">SD</th>
+<th data-quarto-table-cell-role="th">Min</th>
+<th data-quarto-table-cell-role="th">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PersonAge</td>
+<td>32409</td>
+<td>27.7</td>
+<td>26.0</td>
+<td>6.2</td>
+<td>20.0</td>
+<td>94.0</td>
+</tr>
+<tr class="even">
+<td>PersonIncome</td>
+<td>32409</td>
+<td>65894.3</td>
+<td>55000.0</td>
+<td>52517.9</td>
+<td>4000.0</td>
+<td>2039784.0</td>
+</tr>
+<tr class="odd">
+<td>PersonEmpLength</td>
+<td>32409</td>
+<td>4.8</td>
+<td>4.0</td>
+<td>4.0</td>
+<td>0.0</td>
+<td>41.0</td>
+</tr>
+<tr class="even">
+<td>LoanAmnt</td>
+<td>32409</td>
+<td>9592.5</td>
+<td>8000.0</td>
+<td>6320.9</td>
+<td>500.0</td>
+<td>35000.0</td>
+</tr>
+<tr class="odd">
+<td>LoanIntRate</td>
+<td>32409</td>
+<td>11.0</td>
+<td>11.0</td>
+<td>3.2</td>
+<td>5.4</td>
+<td>23.4</td>
+</tr>
+<tr class="even">
+<td>LoanPercentIncome</td>
+<td>32409</td>
+<td>0.2</td>
+<td>0.2</td>
+<td>0.1</td>
+<td>0.0</td>
+<td>0.8</td>
+</tr>
+<tr class="odd">
+<td>CredHistory</td>
+<td>32409</td>
+<td>5.8</td>
+<td>4.0</td>
+<td>4.1</td>
+<td>2.0</td>
+<td>30.0</td>
+</tr>
+<tr class="even">
+<td>PersonHomeOwnership</td>
+<td>32409</td>
+<td>Categorical variable</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>LoanIntent</td>
+<td>32409</td>
+<td>Categorical variable</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>LoanGrade</td>
+<td>32409</td>
+<td>Categorical variable</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>LoanStatus</td>
+<td>32409</td>
+<td>Categorical variable</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>PreviousDefault</td>
+<td>32409</td>
+<td>Categorical variable</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Table 1 and 2 display missing values and summary statistics for all variables. Only <em>PersonEmpLength</em> and <em>LoanIntRate</em> had missing values, with 887 and 3095, respectively. To maintain sample size and address skew, median imputation was used for <em>PersonEmpLength</em>, while <em>LoanIntRate</em>, highly correlated with <em>LoanGrade</em> (see Figure 5), was imputed using regression. Duplicate rows were also removed, reducing the dataset to 32415 observations. Additionally, implausible maximum values for <em>PersonAge</em> and <em>PersonEmpLength</em> (144 and 123) were treated as errors and removed. After filtering, the adjusted maximum values were 94 for <em>PersonAge</em> and 41 for <em>PersonEmpLength</em>, ensuring data integrity.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="how-the-data-behaves-exploring-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="how-the-data-behaves-exploring-distributions"><strong>2.2 How the Data Behaves: Exploring Distributions</strong></h3>
+<div id="cell-fig-dist" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div id="fig-dist" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" data-fig-pos="H">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-dist-output-1.png" class="quarto-figure quarto-figure-center figure-img" data-fig-pos="H" width="762" height="764">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Histograms of all Numeric Variables
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positively skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. <em>PersonAge</em>, <em>PersonEmpLength</em> and <em>CredHistory</em> have very similar distributions, indicating a potential correlation between these variables.</p>
+<div id="cell-fig-data-over" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div id="fig-data-over" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-data-over-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-data-over-output-1.png" width="764" height="749" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-data-over-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Data Preparation Overview
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Figure 2(a) shows that the data isn’t scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed with normalised data shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in <em>PersonIncome</em> is due to people earning considerably more than average.</p>
+<p>Figure 2(c) demonstrates the distribution of <em>LoanStatus</em> within the dataset. This can cause large impacts on the ML models deployed in the analysis, leading to skewed performance metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, I implemented class weighting within my ML models.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="detecting-relationships-and-multicollinearity-among-variables" class="level3">
+<h3 class="anchored" data-anchor-id="detecting-relationships-and-multicollinearity-among-variables"><strong>2.3 Detecting Relationships and Multicollinearity Among Variables</strong></h3>
+<div id="cell-fig-Corr-Multi" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div id="fig-corr-multi" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-corr-multi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-corr-multi-output-1.png" width="757" height="1139" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-corr-multi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Correlation and Multicollinearity Analysis
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target <em>LoanStatus</em>. <em>LoanGrade</em> and <em>LoanIntRate</em> have a high correlation coefficient (r = 0.95), indicating that they are highly correlated. Also, a similar relationship is shown between <em>PersonAge</em> and <em>CredHistory</em> (r = 0.81). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While these correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.</p>
+<p>VIF values for all the variables are shown in Figure 3(b). In contrast to Figure 3(a), <em>LoanGrade</em>, <em>LoanIntRate</em>, <em>PersonAge</em>, and <em>CredHistory</em> have low VIF values, indicating low levels of multicollinearity. However, <em>LoanAmnt</em> and <em>LoanPercentIncome</em> have VIF values close to 10 which indicates potential for multicollinearity and actions need to be taken to ensure they don’t affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the effects of multicollinearity. Other models are tree-based and handle multicollinearity, therefore no further processing is needed.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="moving-beyond-correlation-searching-for-causality" class="level3">
+<h3 class="anchored" data-anchor-id="moving-beyond-correlation-searching-for-causality"><strong>2.4 Moving Beyond Correlation: Searching for Causality</strong></h3>
+<p>This section explores the heterogeneous impact of <em>PreviousDefault</em> on the likelihood of defaulting again, using a causal forest framework. <em>PreviousDefault</em> was used within this analysis as <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">Hand, D. J., &amp; Henley, W. E. (<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">1997</a>)</span> observed past defaulting status has a strong association with future loan defaults. By estimating conditional average treatment effects (CATEs), we can observe how the effect of previous default varies across individual borrower profiles.</p>
+<div id="cell-fig-causal_a" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div id="fig-causal_a" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-causal_a-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-causal_a-output-1.png" width="601" height="429" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-causal_a-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Estimated Treatment Effects (CATE) for Previous Default
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Figure 4 shows estimated CATEs, revealing a negatively-skewed distribution with most values centred near zero. This suggests that, for the majority of borrowers, previous default status has a marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behaviour. The long right tail emphasises the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+</section>
+<section id="can-machines-predict-who-defaults" class="level2">
+<h2 class="anchored" data-anchor-id="can-machines-predict-who-defaults"><strong>3. Can Machines Predict Who Defaults?</strong></h2>
+<p>Within this analysis, LR, RF, and XGboost models will be trained to predict <strong><em>LoanStatus</em></strong> using <em>PersonAge</em>, <em>PersonIncome</em>, <em>PersonHomeOwnership</em>, <em>PersonEmpLength</em>, <em>LoanIntent</em>, <em>LoanGrade</em>, <em>LoanAmnt</em>, <em>LoanIntRate</em>, <em>LoanPercentIncome</em>, <em>PreviousDefault</em> and <em>CredHistory</em>.</p>
+<p>Before training the models, the dataset was split into train and test sets using an 80:20 ratio to ensure fair evaluation on unseen data. To optimise model performance and avoid overfitting, hyperparameter tuning was conducted using grid search combined with 3-fold cross-validation and L1 + L2 regularisation. To deal with the class imbalance, class weighting was implemented along with prioritising F1-score to reduce financial losses from false negatives but allow the model to remain precise.</p>
+<section id="machine-learning-in-action-lr-rf-and-xgboost" class="level3">
+<h3 class="anchored" data-anchor-id="machine-learning-in-action-lr-rf-and-xgboost"><strong>3.1 Machine Learning in Action: LR, RF, and XGBoost</strong></h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset tabset-pills w-100">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href=""><strong>3.1.1 Logistic Regression</strong></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href=""><strong>3.1.2 Random Forest</strong></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href=""><strong>3.1.3 XGBoost</strong></a></li></ul>
+<div class="tab-content tabset-pills w-100">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<p>The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with.</p>
+<div id="cell-fig-LR-Vis" class="cell" data-execution_count="15">
+<div class="cell-output cell-output-display">
+<div id="fig-lr-vis" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lr-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-lr-vis-output-1.png" width="717" height="590" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lr-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Logistic Regression Model Visualisations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Figure 5(a) shows the ROC curve for the LR model, an indication of the trade-off between sensitivity and specificity of the model. The model achieved an AUC score of 0.842, regarded as considerable <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>, indicating solid predictive performance when distinguishing between positive outcomes. The model’s curve lies well above the diagonal reference line (AUC = 0.5), which represents random classification, demonstrating its predictive applications. However, the graph shows room for improvement due to the true positive rate (TPR) remaining below 0.9.</p>
+<p>Figure 5(b) visualises the error within the classification model. The matrix reveals that the model correctly identified 3767 non-default cases (true negatives) and 1128 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 1282 non-default cases were misclassified as defaults (false positives), while 305 defaulters were missed (false negatives), which could result in financial loss for lenders.</p>
+<p>Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that <em>LoanIntRate</em> and <em>LoanPercentIncome</em> have the strongest positive associations with default, with odds ratios of 2.797 and 2.234, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, <em>PersonIncome</em> has an odds ratio of 0.602, indicating that higher income lowers default probability, consistent with economic expectations.</p>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<p>The second model that was developed and compared with the LR model was an RF, trained on all the standard variables, as they have been shown to have superior performance than LR models <span class="citation" data-cites="Couronne:2018">(<a href="#ref-Couronne:2018" role="doc-biblioref">Couronné et al., 2018</a>)</span>.</p>
+<div id="cell-fig-RF-Vis" class="cell" data-execution_count="17">
+<div class="cell-output cell-output-display">
+<div id="fig-rf-vis" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rf-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-rf-vis-output-1.png" width="717" height="565" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rf-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Random Forest Model Visualisations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The ROC curve, illustrated in Figure 6(a), showcases its improved classification ability in distinguishing between cases and can be compared to LRs. The model achieved a excellent AUC of 0.927 <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>, indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction, however highly accurate performance may indicate overfitting.</p>
+<p>The confusion matrix (Figure 6(b)) provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted non-default for 4998 instances (True Negatives), and correctly identified defaulting for 984 instances (True Positives). However, there were 51 false positives, where the model incorrectly predicted defaulting when the actual class was non-default, and 449 false negatives. This confusion matrix reiterates the improved performance from the LR as the incorrect classification instances have decreased.</p>
+<p>Figure 6(c) demonstrates the most influential features when predicting credit risk by visualising feature importance calculated using mean decrease in accuracy. <em>LoanIntRate</em> is the most important feature suggesting that the proportion of income allocated to a loan has the strongest impact on the model’s predictions, supporting the conclusions from the LR which ranked it second. <em>LoanPercentIncome</em> and <em>PersonIncome</em> are also shown to be within the top 3 most important features as they are in the LR model. Conversely, to the LR, the RF shows <em>LoanGrade</em> to have high importance whereas Figure 8 shows it to have very little impact on credit risk for the LR model, potentially attributed to the differences in model architecture.</p>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<p>The third model that I deployed to improve upon the RF model was an XGBoost as they have been shown to reduce potential overfitting and have higher performance and speed than RFs <span class="citation" data-cites="GeeksforGeeks:2024">(<a href="#ref-GeeksforGeeks:2024" role="doc-biblioref">GeeksforGeeks, 2024</a>)</span>.</p>
+<div id="cell-fig-XGB-Vis" class="cell" data-execution_count="19">
+<div class="cell-output cell-output-display">
+<div id="fig-xgb-vis" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-xgb-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-xgb-vis-output-1.png" width="717" height="562" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-xgb-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: XGBoost Model Visualisations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Figure 7(a) visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score than the RF (AUC = 0.944), demonstrating excellent predictive performance <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>. Its built-in regularisation, max_depth, min_child_weight, and L1/L2 regularisation, reduces the risk of overfitting despite its complexity.</p>
+<p>Figure 7(b) reiterates the increased performance of the XGBoost. XGBoost predicts 50 more true positives than the RF, indicating better sensitivity avoiding potentially revenue losses due to defaulting. The model also has 15 fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters.</p>
+<p>Figure 7(c) contradicts the other models (LR and RF), as these models predicted <em>LoanPercentIncome</em> to have less of an impact on the predictions than the XGBoost model. However, similar to the RF and LR model, the XGBoost placed high importance on <em>PersonHomeOwnership</em> reinforcing the notion that the proportion of income allocated to a loan significantly impacts the risk of defaulting. However, <em>LoanGrade</em> ranks higher than in the RF and LR, indicating that home ownership status may play a larger role in how XGBoosts evaluates credit risk.</p>
+</div>
+</div>
+</div>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="which-model-learns-best-comparing-lr-rf-xgboost" class="level3">
+<h3 class="anchored" data-anchor-id="which-model-learns-best-comparing-lr-rf-xgboost"><strong>3.2 Which Model Learns Best? Comparing LR, RF &amp; XGBoost</strong></h3>
+<div id="cell-fig-model-eval" class="cell" data-execution_count="20">
+<div class="cell-output cell-output-display">
+<div id="fig-model-eval" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-model-eval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Blog_files/figure-html/fig-model-eval-output-1.png" width="750" height="747" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-model-eval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Model Evaluation and Comparisons
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Figure 8(a) shows that XGBoost (0.928) achieves the highest accuracy, closely followed by RF (0.923), while LR lags behind (0.755). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimising the cost of misclassifying defaulters is critical <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">(<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">Hand, D. J., &amp; Henley, W. E., 1997</a>)</span>.</p>
+<p>Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (0.944), strong sensitivity (0.722), and F1 score (0.816). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (0.787) however, precision (0.468) is lacking reducing the applications of this model. Also, LR has the highest log loss (8.825), suggesting poorer probability calibration.</p>
+<p>In credit risk analysis, recall is critical. Missing a default is costlier than a false alarm <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">(<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">Hand, D. J., &amp; Henley, W. E., 1997</a>)</span>. While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.</p>
+<p>Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritise features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively <span class="citation" data-cites="Zhou:2002">(<a href="#ref-Zhou:2002" role="doc-biblioref">Zhou et al., 2002</a>)</span>, making them more suited to complex credit risk tasks.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="who-gets-a-fair-deal-auditing-xgboosts-default-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="who-gets-a-fair-deal-auditing-xgboosts-default-predictions"><strong>3.3 Who Gets a Fair Deal? Auditing XGBoost’s Default Predictions</strong></h3>
+<div class="cell" data-execution_count="22">
+<div class="cell-output cell-output-display" data-execution_count="22">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<caption>Table 3: Fairness Audit</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Group</th>
+<th data-quarto-table-cell-role="th">Accuracy</th>
+<th data-quarto-table-cell-role="th">Recall</th>
+<th data-quarto-table-cell-role="th">F1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Low Income</td>
+<td>0.915</td>
+<td>0.771</td>
+<td>0.849</td>
+</tr>
+<tr class="even">
+<td>High Income</td>
+<td>0.942</td>
+<td>0.607</td>
+<td>0.734</td>
+</tr>
+<tr class="odd">
+<td>Young (&lt; median age)</td>
+<td>0.928</td>
+<td>0.741</td>
+<td>0.831</td>
+</tr>
+<tr class="even">
+<td>Old (≥ median age)</td>
+<td>0.928</td>
+<td>0.703</td>
+<td>0.801</td>
+</tr>
+<tr class="odd">
+<td>Renters</td>
+<td>0.929</td>
+<td>0.814</td>
+<td>0.878</td>
+</tr>
+<tr class="even">
+<td>Homeowners</td>
+<td>0.992</td>
+<td>0.871</td>
+<td>0.931</td>
+</tr>
+<tr class="odd">
+<td>Mortgage</td>
+<td>0.915</td>
+<td>0.432</td>
+<td>0.575</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The fairness audit of the XGBoost model highlights clear differences in recall across borrower subgroups. While overall accuracy remains high, recall is substantially lower for high-income (0.607) and mortgage (0.432) groups, suggesting the model is less effective at flagging defaulters in these categories. In contrast, renters (0.814) and homeowners (0.871) benefit from stronger sensitivity. These gaps may reflect imbalanced data or overlapping traits that obscure risk signals. For instance, mortgagers may combine stable income with high debt, complicating predictions. High-income defaulters may also be underrepresented, reducing model focus. Addressing these differences through subgroup-aware tuning or fairness constraints can improve equity in credit assessments.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+<section id="from-models-to-meaning-what-we-can-learn" class="level3">
+<h3 class="anchored" data-anchor-id="from-models-to-meaning-what-we-can-learn"><strong>3.4 From Models to Meaning: What We Can Learn</strong></h3>
+<p>This project showed that ensemble learning models like XGBoost and RF can significantly improve how we assess credit risk. Unlike traditional approaches, these models pick up on complex, non-linear relationships in financial data and handle imbalanced datasets much better <span class="citation" data-cites="Chopra:2018">(<a href="#ref-Chopra:2018" role="doc-biblioref">Chopra &amp; Bhilare, 2018</a>)</span>. Features such as <em>LoanGrade</em>, <em>LoanPercentIncome</em>, and <em>PersonIncome</em> emerged as key predictors, helping lenders make more accurate decisions, reduce misclassifications, and ultimately lower default rates.</p>
+<p>However, there are trade-offs. These models are harder to interpret, which can be a challenge in regulated sectors where transparency is important <span class="citation" data-cites="Rudin:2019">(<a href="#ref-Rudin:2019" role="doc-biblioref">Rudin, 2019</a>)</span>. They also demand more computational power, which might limit access for smaller institutions <span class="citation" data-cites="Lei:2025">(<a href="#ref-Lei:2025" role="doc-biblioref">Lei, 2025</a>)</span>. Without proper tuning, they can overfit on skewed data <span class="citation" data-cites="Cheng:2021">(<a href="#ref-Cheng:2021" role="doc-biblioref">Cheng et al., 2021</a>)</span>. There’s also the risk of reinforcing biases present in the training data, potentially leading to unfair outcomes in lending <span class="citation" data-cites="Shah:2025">(<a href="#ref-Shah:2025" role="doc-biblioref">Shah &amp; Davis, 2025</a>)</span>. Moving forward, improving explainability, tuning, and fairness will be essential for making these models more practical and trustworthy.</p>
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
+</section>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways"><strong>4. Key Takeaways</strong></h2>
+<p>This project compared the performance of LR, RF, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics, with the highest accuracy (0.928), AUC (0.944), and F1-score (0.816), showing its strength in capturing complex, non-linear patterns in borrower behavior. RF also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. LR trailed behind, limited by its simpler, linear structure.</p>
+<p>When looking at what each model focused on, LR leaned heavily on income-based features like PersonIncome and LoanPercentIncome. In contrast, RF and XGBoost picked up broader signals, giving more weight to LoanGrade and PersonHomeOwnership. This suggests that ensemble models offer a more rounded view of credit risk.</p>
+<p>To explore how default risk changes across different borrowers, a causal forest was used to estimate conditional average treatment effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.</p>
+<p>Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot.</p>
+<!-- Back to Top Button -->
+<button onclick="topFunction()" id="backToTopBtn" title="Go to top">
+↑ Top
+</button>
+<script>
+  // Show the button when user scrolls down
+  window.onscroll = function () {
+    let btn = document.getElementById("backToTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+      btn.style.display = "block";
+    } else {
+      btn.style.display = "none";
+    }
+  };
+
+  // Scroll to top smoothly
+  function topFunction() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references"><strong>5. References</strong></h2>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-Cheng:2021" class="csl-entry" role="listitem">
+Cheng, D., Chen, C., Wang, X., &amp; Xiang, S. (2021). Efficient top-k vulnerable nodes detection in uncertain graphs. <em>IEEE Trans. Knowl. Data Eng.</em>, 1–1. <a href="https://doi.org/10.1109/tkde.2021.3094549">https://doi.org/10.1109/tkde.2021.3094549</a>
+</div>
+<div id="ref-Chopra:2018" class="csl-entry" role="listitem">
+Chopra, A., &amp; Bhilare, P. (2018). Application of ensemble models in credit scoring models. <em>Bus. Perspect. Res.</em>, <em>6</em>(2), 129–141. <a href="https://doi.org/10.1177/2278533718765531">https://doi.org/10.1177/2278533718765531</a>
+</div>
+<div id="ref-Corbacioglu:2023" class="csl-entry" role="listitem">
+Çorbacıoğlu, Ş. K., &amp; Aksel, G. (2023). Receiver operating characteristic curve analysis in diagnostic accuracy studies: A guide to interpreting the area under the curve value: A guide to interpreting the area under the curve value. <em>Turk. J. Emerg. Med.</em>, <em>23</em>(4), 195–198. <a href="https://doi.org/10.4103/tjem.tjem_182_23">https://doi.org/10.4103/tjem.tjem_182_23</a>
+</div>
+<div id="ref-Couronne:2018" class="csl-entry" role="listitem">
+Couronné, R., Probst, P., &amp; Boulesteix, A.-L. (2018). Random forest versus logistic regression: A large-scale benchmark experiment. <em>BMC Bioinformatics</em>, <em>19</em>(1). <a href="https://doi.org/10.1186/s12859-018-2264-5">https://doi.org/10.1186/s12859-018-2264-5</a>
+</div>
+<div id="ref-GeeksforGeeks:2024" class="csl-entry" role="listitem">
+GeeksforGeeks. (2024). <em>Difference between random forest and <span>XGBoost</span></em>. <a href="https://www.geeksforgeeks.org/difference-between-random-forest-vs-xgboost/" class="uri">https://www.geeksforgeeks.org/difference-between-random-forest-vs-xgboost/</a>.
+</div>
+<div id="ref-Hand_D_J_Henley_W_E:1997" class="csl-entry" role="listitem">
+Hand, D. J., &amp; Henley, W. E. (1997). Statistical classification methods in consumer credit scoring: A review. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>, <em>160</em>(3), 523–541. <a href="https://doi.org/10.1111/j.1467-985X.1997.00078.x">https://doi.org/10.1111/j.1467-985X.1997.00078.x</a>
+</div>
+<div id="ref-Lei:2025" class="csl-entry" role="listitem">
+Lei, A. (2025). <em>Challenges with ensemble methods</em>. <a href="https://www.byteplus.com/en/topic/399838?title=challenges-with-ensemble-methods-in-machine-learning" class="uri">https://www.byteplus.com/en/topic/399838?title=challenges-with-ensemble-methods-in-machine-learning</a>.
+</div>
+<div id="ref-Rudin:2019" class="csl-entry" role="listitem">
+Rudin, C. (2019). Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead. <em>Nat. Mach. Intell.</em>, <em>1</em>(5), 206–215. <a href="https://doi.org/10.1038/s42256-019-0048-x">https://doi.org/10.1038/s42256-019-0048-x</a>
+</div>
+<div id="ref-Saito:2015" class="csl-entry" role="listitem">
+Saito, T., &amp; Rehmsmeier, M. (2015). The precision-recall plot is more informative than the <span>ROC</span> plot when evaluating binary classifiers on imbalanced datasets. <em>PLoS One</em>, <em>10</em>(3), e0118432. <a href="https://doi.org/10.1371/journal.pone.0118432">https://doi.org/10.1371/journal.pone.0118432</a>
+</div>
+<div id="ref-Shah:2025" class="csl-entry" role="listitem">
+Shah, A., &amp; Davis, K. (2025). <em>Mitigating model risk in <span>AI</span>: Advancing an <span>MRM</span> framework for <span>AI/ML</span> models at financial institutions</em>.
+</div>
+<div id="ref-Tse:2020" class="csl-entry" role="listitem">
+Tse, L. (2020). <em>Credit risk dataset</em>. <a href="https://www.kaggle.com/datasets/laotse/credit-risk-dataset" class="uri">https://www.kaggle.com/datasets/laotse/credit-risk-dataset</a>.
+</div>
+<div id="ref-Yang:2024" class="csl-entry" role="listitem">
+Yang, R. (2024). Machine learning-based loan default prediction in peer-to-peer lending. <em>Highlights in Science, Engineering and Technology</em>, <em>94</em>, 310–318. <a href="https://doi.org/10.54097/qdjd8r65">https://doi.org/10.54097/qdjd8r65</a>
+</div>
+<div id="ref-Zhou:2002" class="csl-entry" role="listitem">
+Zhou, Z.-H., Wu, J., &amp; Tang, W. (2002). Ensembling neural networks: Many could be better than all. <em>Artif. Intell.</em>, <em>137</em>(1-2), 239–263. <a href="https://doi.org/10.1016/s0004-3702(02)00190-x">https://doi.org/10.1016/s0004-3702(02)00190-x</a>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
