@@ -24,7 +24,7 @@ MODEL_NAME = "gemini-2.0-flash-lite"
 
 st.set_page_config(page_title="Ask My Portfolio", page_icon="💬", layout="wide")
 st.title("💬 Ask My Portfolio")
-st.write("Ask about my CV or projects. Answers come from your local files (PDF/HTML/MD) via retrieval, "
+st.write("Ask about my CV or projects. Answers come from my project files (PDF/HTML/MD) via retrieval, "
          "then Gemini 2.0 Flash-Lite writes a concise answer with citations.")
 
 with st.sidebar:
