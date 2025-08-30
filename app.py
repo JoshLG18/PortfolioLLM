@@ -61,7 +61,7 @@ st.title("💬 Ask My Portfolio")
 
 with st.sidebar:
     st.header("⚙️ Settings")
-    TOP_K = st.slider("Top-k chunks (sent to Gemini)", 3, 64, FINAL_K)
+    TOP_K = st.slider("Top-k chunks (sent to Gemini)", 3, 128, FINAL_K)
     MIN_CHARS = st.slider("Min chunk length (chars)", 60, 2000, MIN_CHARS_DEFAULT, step=20)
     SHOW_CHUNKS = st.checkbox("Show final chunks", False)
 
