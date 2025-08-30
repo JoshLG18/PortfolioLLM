@@ -39,7 +39,7 @@ OVERLAP_SENTS = 1
 W_SPARSE = 0.65
 W_BM25   = 0.35
 CANDIDATE_POOL = 128         # how many to retrieve before re-ranking
-FINAL_K = 64                  # how many chunks to send to Gemini for answering
+FINAL_K = 128                  # how many chunks to send to Gemini for answering
 DEDUP_THRESHOLD = 0.90       # char-tfidf cosine for near-duplicate filtering
 
 # Query expansion (extend for your domain)
