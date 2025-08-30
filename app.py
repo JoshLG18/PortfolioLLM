@@ -69,7 +69,7 @@ with st.sidebar:
 # ==========================================================
 # Quota tracking
 # ==========================================================
-def _load_quota():
+def _load_quota(): # Load in the requests quota
     today = datetime.date.today().isoformat()
     try:
         if os.path.exists(QUOTA_FILE):
@@ -81,10 +81,10 @@ def _load_quota():
         pass
     return {"date": today, "count": 0}
 
-def remaining_quota() -> int:
+def remaining_quota() -> int: # work out the remaining quota for the day
     return max(0, DAILY_QUOTA - _load_quota()["count"])
 
-def check_and_increment_quota(n_calls: int = 1) -> bool:
+def check_and_increment_quota(n_calls: int = 1) -> bool: # increment the quota when requests are made
     """Reserve n_calls; return True if allowed and persist."""
     data = _load_quota()
     if data["count"] + n_calls > DAILY_QUOTA:
@@ -97,20 +97,20 @@ def check_and_increment_quota(n_calls: int = 1) -> bool:
         pass
     return True
 
-with st.sidebar:
+with st.sidebar: # show the qouta on the sidebar
     st.markdown(f"**🔒 Daily quota left:** {remaining_quota()} / {DAILY_QUOTA}")
 
 
 # ==========================================================
 # Utilities
 # ==========================================================
-TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
+TOKEN_RE = re.compile(r"[A-Za-z0-9_]+") 
 stemmer = SnowballStemmer("english")
 
-def sent_tokenize(text: str) -> List[str]:
+def sent_tokenize(text: str) -> List[str]: # sentence splitter based on punctuation
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
 
-def windowed_chunks(sentences: List[str], min_chars=120, max_chars=900, overlap_sents=1) -> List[str]:
+def windowed_chunks(sentences: List[str], min_chars=120, max_chars=900, overlap_sents=1) -> List[str]: # create chunks using the tokenised sentences
     chunks, buf, cur = [], [], 0
     for s in sentences:
         if cur + len(s) <= max_chars or cur < min_chars:
@@ -122,7 +122,7 @@ def windowed_chunks(sentences: List[str], min_chars=120, max_chars=900, overlap_
     if buf: chunks.append(" ".join(buf))
     return [c for c in chunks if len(c) >= min_chars]
 
-def read_pdf_chunks(path: str, min_chars: int):
+def read_pdf_chunks(path: str, min_chars: int): # reads a pdf
     out = []
     with open(path, "rb") as f:
         reader = PdfReader(f)
@@ -133,7 +133,7 @@ def read_pdf_chunks(path: str, min_chars: int):
                 out.append({"title": f"{os.path.basename(path)} — p{p_i}.{j}", "text": ch, "href": path})
     return out
 
-def read_html_chunks(path: str, min_chars: int):
+def read_html_chunks(path: str, min_chars: int): # reads html
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         soup = BeautifulSoup(f.read(), "html.parser")
     text = soup.get_text(separator="\n", strip=True)
@@ -144,7 +144,7 @@ def read_html_chunks(path: str, min_chars: int):
             out.append({"title": f"{os.path.basename(path)} — ¶{i}.{j}", "text": ch, "href": path})
     return out
 
-def read_md_chunks(path: str, min_chars: int):
+def read_md_chunks(path: str, min_chars: int): # reads markdown files
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         text = f.read()
     out = []
@@ -154,20 +154,20 @@ def read_md_chunks(path: str, min_chars: int):
             out.append({"title": f"{os.path.basename(path)} — ¶{i}.{j}", "text": ch, "href": path})
     return out
 
-READERS = {
+READERS = { # defines a dictionary for which function to use depending on the file being read
     ".pdf": read_pdf_chunks,
     ".html": read_html_chunks,
     ".htm": read_html_chunks,
     ".md": read_md_chunks,
     ".markdown": read_md_chunks,
-}
+} 
 
 
 # ==========================================================
 # Load & index docs
 # ==========================================================
 @st.cache_data(show_spinner=True)
-def load_chunks(min_chars: int):
+def load_chunks(min_chars: int): # read supported files from docs and return the files, chunks and any errors
     files = [fp for fp in glob.glob("docs/*") if os.path.splitext(fp)[1].lower() in READERS]
     chunks, errors = [], []
     for fp in files:
@@ -178,10 +178,12 @@ def load_chunks(min_chars: int):
     return files, chunks, errors
 
 files, chunks, errors = load_chunks(MIN_CHARS)
-if not chunks:
+
+if not chunks: # if there are no chunks return an error message
     st.info("Put .pdf/.html/.md files in `/docs` then reload.")
     st.stop()
-if errors:
+
+if errors: # if there are errors with the parsing print an error
     with st.expander("Parse errors"):
         for e in errors:
             st.warning(e)
@@ -191,30 +193,32 @@ if errors:
 # Robust sparse index (word + char + title) and BM25
 # ==========================================================
 def stem_analyzer(text: str):
-    tokens = TOKEN_RE.findall(text.lower())
-    return [stemmer.stem(t) for t in tokens if len(t) > 1]
+    tokens = TOKEN_RE.findall(text.lower()) # splits up words and makes them lower case
+    return [stemmer.stem(t) #returns the root form of some of the words
+             for t in tokens if len(t) > 1] # removes any words that are only one letter
 
 @st.cache_resource(show_spinner=True)
 def build_sparse_and_bm25(texts: List[str], titles: List[str]):
     # Word TF-IDF
-    vec_word = TfidfVectorizer(
-        analyzer=stem_analyzer,
-        ngram_range=(1, 2),
-        sublinear_tf=True,
-        min_df=2, max_df=0.9,
-        norm="l2", lowercase=False,
+    vec_word = TfidfVectorizer( # builds a word level vectoriser
+        analyzer=stem_analyzer, # uses the custom tokeniser
+        ngram_range=(1, 2), # extracts both uni and bigrams
+        sublinear_tf=True, # uses log scaling so frequently used words don't skew
+        min_df=2, max_df=0.9, # ignores words that are used in less than 2 docs and more than 90% of docs
+        norm="l2", # normalises each vector
+        lowercase=False,
         max_features=None
     )
     # Char TF-IDF
-    vec_char = TfidfVectorizer(
-        analyzer="char",
-        ngram_range=(3, 5),
-        sublinear_tf=True,
-        min_df=2, max_df=0.95,
-        norm="l2"
+    vec_char = TfidfVectorizer( # builds a character level vectoriser 
+        analyzer="char", # splits sentences into sequences of characters
+        ngram_range=(3, 5), # characters range from 3 to 5 in length
+        sublinear_tf=True, # uses log scaling to stop frequency skew
+        min_df=2, max_df=0.95, # ignores words that are used in less than 2 docs and more than 90% of docs
+        norm="l2" # normalises each vector
     )
     # Title TF-IDF (boosted)
-    vec_title = TfidfVectorizer(
+    vec_title = TfidfVectorizer( # creates a title vectoriser
         analyzer=stem_analyzer,
         ngram_range=(1, 2),
         sublinear_tf=True,
@@ -222,15 +226,15 @@ def build_sparse_and_bm25(texts: List[str], titles: List[str]):
         norm="l2", lowercase=False
     )
 
-    X_word  = vec_word.fit_transform(texts)
-    X_char  = vec_char.fit_transform(texts)
-    X_title = vec_title.fit_transform(titles) * 2.0
-    X_sparse = hstack([X_word, X_char, X_title], format="csr")
+    X_word  = vec_word.fit_transform(texts) # creates a sparse matrix of words
+    X_char  = vec_char.fit_transform(texts) # creates a sparse matrix of characters
+    X_title = vec_title.fit_transform(titles) * 2.0 # creates a sparse matrix of titles and increases the magnitude
+    X_sparse = hstack([X_word, X_char, X_title], format="csr") # horizontally stacks features into one large sparse matrix
 
     # BM25 corpus (stemmed)
-    tokenized = [stem_analyzer(t) for t in texts]
-    bm25 = BM25Okapi(tokenized)
-    return (vec_word, vec_char, vec_title, X_sparse, X_char, bm25)
+    tokenized = [stem_analyzer(t) for t in texts] # tokenises each chunk
+    bm25 = BM25Okapi(tokenized) # creates a score of how similar a chunk is to the query
+    return (vec_word, vec_char, vec_title, X_sparse, X_char, bm25) # return each vector and the scores
 
 vec_word, vec_char, vec_title, X_sparse, X_char, bm25 = build_sparse_and_bm25(
     [c["text"] for c in chunks],
@@ -239,11 +243,11 @@ vec_word, vec_char, vec_title, X_sparse, X_char, bm25 = build_sparse_and_bm25(
 
 def normalize(v):
     import numpy as np
-    v = np.asarray(v, dtype=float)
+    v = np.asarray(v, dtype=float) # convert np array to floats
     vmin, vmax = v.min(), v.max()
     if vmax - vmin < 1e-9:
         return np.zeros_like(v)
-    return (v - vmin) / (vmax - vmin)
+    return (v - vmin) / (vmax - vmin) # min max normalisation
 
 
 # ==========================================================
@@ -251,23 +255,23 @@ def normalize(v):
 # ==========================================================
 def expand_query(q: str, prf_titles: List[str]) -> str:
     extras = []
-    for raw in TOKEN_RE.findall(q.lower()):
-        extras += SYNONYM_MAP.get(raw, [])
-    prf = " ".join(prf_titles[:5]) if prf_titles else ""
+    for raw in TOKEN_RE.findall(q.lower()): # splits the query into alpha numeric tokens
+        extras += SYNONYM_MAP.get(raw, []) # looks up all the synonyms in the query
+    prf = " ".join(prf_titles[:2]) if prf_titles else "" # takes top 5 most relevant document titles
     expanded = q
     if extras:
         expanded += " " + " ".join(sorted(set(extras)))
     if prf:
-        expanded += " " + prf
+        expanded += " " + prf # expands the query to include all synonyms
     return expanded
 
 def retrieve_candidates(query: str, pool: int) -> List[int]:
     # First-pass BM25 to harvest titles for PRF
-    bm_first = bm25.get_scores(stem_analyzer(query))
-    bm_top = bm_first.argsort()[::-1][:10]
-    prf_titles = [chunks[i]["title"] for i in bm_top]
+    bm_first = bm25.get_scores(stem_analyzer(query)) # scores all the chunks with bm25
+    bm_top = bm_first.argsort()[::-1][:10] # takes top 10 scoring chunks
+    prf_titles = [chunks[i]["title"] for i in bm_top] # extracts their titles
 
-    qx = expand_query(query, prf_titles)
+    qx = expand_query(query, prf_titles) # expands the query and adds top 5 titles to the query
 
     # Sparse cosine
     qw = vec_word.transform([qx])
@@ -277,11 +281,11 @@ def retrieve_candidates(query: str, pool: int) -> List[int]:
     s_sparse = cosine_similarity(q_sparse, X_sparse).ravel()
 
     # BM25
-    s_bm25 = bm25.get_scores(stem_analyzer(qx)).astype(float)
+    s_bm25 = bm25.get_scores(stem_analyzer(qx)).astype(float) # runs bm25 but on the expanded query
 
     # Hybrid
-    score = W_SPARSE*normalize(s_sparse) + W_BM25*normalize(s_bm25)
-    cand = score.argsort()[::-1][:pool]
+    score = W_SPARSE*normalize(s_sparse) + W_BM25*normalize(s_bm25) # balances semantic and lexical matches
+    cand = score.argsort()[::-1][:pool] # sorts chunks by hybrid score
     return list(cand)
 
 def gemini_rerank(question: str, cand_idxs: List[int], top_k: int) -> List[int]:
