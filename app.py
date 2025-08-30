@@ -31,15 +31,15 @@ QUOTA_FILE = ".gemini_quota.json"
 MODEL_NAME = "gemini-2.0-flash-lite"
 
 # Retrieval constants tuned for accuracy
-MIN_CHARS_DEFAULT = 160
-MAX_CHARS = 1000
+MIN_CHARS_DEFAULT = 1000
+MAX_CHARS = 4000
 OVERLAP_SENTS = 1
 
 # Hybrid weights and sizes
 W_SPARSE = 0.65
 W_BM25   = 0.35
-CANDIDATE_POOL = 40          # how many to retrieve before re-ranking
-FINAL_K = 5                  # how many chunks to send to Gemini for answering
+CANDIDATE_POOL = 128         # how many to retrieve before re-ranking
+FINAL_K = 64                  # how many chunks to send to Gemini for answering
 DEDUP_THRESHOLD = 0.90       # char-tfidf cosine for near-duplicate filtering
 
 # Query expansion (extend for your domain)
