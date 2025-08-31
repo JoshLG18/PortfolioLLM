@@ -352,62 +352,64 @@ def dedup_by_char_tfidf(indices: List[int], limit: int) -> List[int]:
 # ==========================================================
 # Gemini client
 # ==========================================================
-api_key = st.secrets.get("GEMINI_API_KEY")
-if not api_key:
+api_key = st.secrets.get("GEMINI_API_KEY") # collect the api key from the secrets
+if not api_key: # if there is no API key output and error
     st.error("Missing GEMINI_API_KEY in .streamlit/secrets.toml")
     st.stop()
+
+# Set up the gemeni model
 genai.configure(api_key=api_key)
 _gemini = genai.GenerativeModel(MODEL_NAME)
 
 def llm_answer_with_gemini(question: str, contexts: List[Dict]) -> str:
     blocks = []
-    for i, c in enumerate(contexts[:5], 1):
+    for i, c in enumerate(contexts[:5], 1): # takes 128 chunks and gives them to gemini
         txt = c["text"]
         if len(txt) > 1000: txt = txt[:1000] + " ..."
         blocks.append(f"[{i}] {c['title']}\n{txt}")
-    context = "\n\n".join(blocks)
-    system = (
-        "Read and understand the sources that you have been given. "
+    context = "\n\n".join(blocks) #joins all chunks to create the context
+    system = ( # sets the system chunks
+        "Read and understand the sources that you have been given."
         "Answer strictly from the provided sources. Be concise and factual. "
         "Always cite sources like [1], [2]. If not present in sources, say you can't find it. "
         "Reply in deduplicated bullet points."
     )
-    prompt = f"{system}\n\nQuestion: {question}\n\nSources:\n{context}\n\nAnswer:"
-    r = _gemini.generate_content(prompt)
-    return (r.text or "").strip()
+    prompt = f"{system}\n\nQuestion: {question}\n\nSources:\n{context}\n\nAnswer:" # builds the final prompt
+    r = _gemini.generate_content(prompt) # sends the prompt to gemini and stores the answer
+    return (r.text or "").strip() # returns geminis answer
 
 
 # ==========================================================
 # UI — Ask
 # ==========================================================
 st.divider()
-q = st.text_input("Ask something:")
-if q:
+q = st.text_input("Ask something:") # input for the user to enter a question
+if q: # if a question has been asked
     try:
         # 1) Retrieve a strong candidate pool (cheap)
-        cand = retrieve_candidates(q, pool=CANDIDATE_POOL)
+        cand = retrieve_candidates(q, pool=CANDIDATE_POOL) # scores all chunks and returns the top 128
 
         # 2) Ensure quota for 2 calls: re-rank + final answer
-        if not check_and_increment_quota(n_calls=2):
+        if not check_and_increment_quota(n_calls=2): # ensure there is enough quota for 2 calls
             st.error(f"Daily limit would be exceeded by this query (needs 2 calls). "
                      f"Remaining: {remaining_quota()} / {DAILY_QUOTA}")
         else:
             # 3) Re-rank with Gemini and dedup
-            ordered = gemini_rerank(q, cand, top_k=max(TOP_K*2, TOP_K))
-            final_indices = dedup_by_char_tfidf(ordered, limit=TOP_K)
-            top = [chunks[i] for i in final_indices]
+            ordered = gemini_rerank(q, cand, top_k=max(TOP_K*2, TOP_K)) # sends the ranked chunks to be reranked
+            final_indices = dedup_by_char_tfidf(ordered, limit=TOP_K) # removes near identical chunks
+            top = [chunks[i] for i in final_indices] # stores the top chunks to be given
 
             # 4) Show answer
-            answer = llm_answer_with_gemini(q, top)
-            st.markdown(answer or "_No answer returned._")
+            answer = llm_answer_with_gemini(q, top) # collects the answer
+            st.markdown(answer or "_No answer returned._") # prints out the answer
 
-            if SHOW_CHUNKS:
-                with st.expander("Final chunks sent to Gemini"):
+            if SHOW_CHUNKS: # if the user wants to show the chunks that were sent to gemini
+                with st.expander("Final chunks sent to Gemini"): # show all the chunks that were sent to gemini
                     for i, c in enumerate(top, 1):
                         st.markdown(f"**[{i}] {c['title']}**")
-                        st.write(c["text"])
+                        st.write(c["text"]) 
 
-            with st.expander("Sources used"):
+            with st.expander("Sources used"): # shows the sourcves that were used
                 for i, s in enumerate(top, 1):
                     st.markdown(f"**[{i}] {s['title']}** — [{s['href']}]({s['href']})")
 
