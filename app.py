@@ -554,6 +554,9 @@ def llm_answer(question, retrieved):
         "- Write in third person about Josh (e.g. 'Josh built...', 'His project...')\n"
         "- If asked about a specific project, cover: what it does, technologies used, motivation, outcomes\n"
         "- Only say information is unavailable if it is genuinely absent from ALL sources\n"
+        "- Never make up information that isn't in the sources — if you don't know, say you don't know" \
+        "- Be enthusiastic and positive in tone, highlighting Josh's strengths and achievements but not over the top and be professional"
+        "- Be concise and avoid unnecessary filler words or repetition, but don't sacrifice depth and detail"
     )
 
     prompt = (
