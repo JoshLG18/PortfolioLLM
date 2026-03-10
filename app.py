@@ -566,8 +566,7 @@ def llm_answer(question, retrieved):
     result = _gemini.generate_content(
         prompt,
         generation_config=genai.types.GenerationConfig(
-            max_output_tokens=2048,
-            temperature=0.3,      # low temp = factual and consistent
+            temperature=0.3,
             top_p=0.95,
         ),
     )
@@ -654,22 +653,24 @@ if q:
                             unsafe_allow_html=True,
                         )
 
-            # sources — show clean filename only, not the full /docs/... path
+            # sources — deduplicated by file, clean display
             with st.expander("📚 Sources"):
                 seen_files = []
-                for i, r in enumerate(top, 1):
-                    c         = r["chunk"]
+                for i, res in enumerate(top, 1):
+                    c         = res["chunk"]
                     fname     = os.path.basename(c["href"])
-                    # strip chunk suffix from title for a clean display name
                     doc_title = c["title"].split(" — chunk")[0]
-                    if fname not in seen_files:
-                        seen_files.append(fname)
+                    if fname in seen_files:
+                        continue
+                    seen_files.append(fname)
+                    safe_title = doc_title.replace("<", "&lt;").replace(">", "&gt;")
+                    safe_fname = fname.replace("<", "&lt;").replace(">", "&gt;")
                     st.markdown(
-                        f"""<div class="source-row">
-                                <span class="source-idx">[{i}]</span>
-                                <span style="color:var(--text);font-size:0.82rem;font-weight:600;">{doc_title}</span>
-                                <span style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.72rem;margin-left:auto;">{fname}</span>
-                            </div>""",
+                        f'<div class="source-row">'
+                        f'<span class="source-idx">[{len(seen_files)}]</span>'
+                        f'<span style="color:var(--text);font-size:0.82rem;font-weight:600;">{safe_title}</span>'
+                        f'<span style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.72rem;margin-left:auto;">{safe_fname}</span>'
+                        f'</div>',
                         unsafe_allow_html=True,
                     )
 
