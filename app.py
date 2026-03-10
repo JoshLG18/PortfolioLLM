@@ -226,7 +226,18 @@ st.markdown(
         background: var(--card) !important; color: var(--gold) !important;
         font-family: var(--mono) !important; font-size: .72rem !important;
         letter-spacing: .08em !important; text-transform: uppercase !important;
-        padding: .55rem 1rem !important;
+        padding: .55rem 1rem .55rem 2.2rem !important;
+        list-style: none !important;
+        overflow: hidden !important;
+    }
+    [data-testid="stExpander"] summary::-webkit-details-marker { display: none !important; }
+    [data-testid="stExpander"] summary::marker { display: none !important; }
+    /* hide the SVG icon that bleeds through */
+    [data-testid="stExpander"] summary svg { display: none !important; }
+    [data-testid="stExpander"] summary p {
+        font-family: var(--mono) !important; font-size: .72rem !important;
+        letter-spacing: .08em !important; text-transform: uppercase !important;
+        color: var(--gold) !important; margin: 0 !important;
     }
     [data-testid="stExpander"] summary:hover { background: var(--card2) !important; }
     [data-testid="stExpander"] > div > div { background: var(--card) !important; padding: .8rem 1rem !important; }
@@ -330,7 +341,7 @@ st.markdown(
     /* ── Page title + badges ─────────────────────────────────────────────── */
     .rag-title {
         font-family: var(--serif) !important;
-        font-size: clamp(2rem, 3vw, 2.5rem) !important;
+        font-size: clamp(3rem, 6vw, 5rem) !important;
         font-weight: 400 !important;
         color: var(--ink) !important;
         line-height: 1.05 !important;
@@ -517,7 +528,7 @@ st.markdown('<div class="rule"><div class="rule-diamond"></div></div>', unsafe_a
 st.markdown(
     """
     <div style="margin:4px 0 12px 0;">
-        <span class="rag-title" style="font-family:'DM Serif Display',Georgia,serif !important; clamp(1.8rem, 3vw, 2.8rem) !important;font-weight:400 !important;color:#e4ddd0 !important;letter-spacing:-.02em !important;display:block !important;">Portfolio RAG</span>
+        <span class="rag-title" style="font-family:'DM Serif Display',Georgia,serif !important;font-size:clamp(3rem,6vw,5rem) !important;font-weight:400 !important;color:#e4ddd0 !important;letter-spacing:-.02em !important;display:block !important;">Portfolio RAG</span>
     </div>
     """,
     unsafe_allow_html=True,
@@ -827,7 +838,7 @@ if q:
                     )
 
             if SHOW_CHUNKS:
-                with st.expander("🔍 Retrieved Chunks"):
+                with st.expander("Retrieved Chunks"):
                     for i, r in enumerate(top, 1):
                         ce    = r["ce_score"]
                         color = "var(--green)" if ce > 5 else "var(--gold)" if ce > 0 else "var(--muted)"
