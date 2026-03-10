@@ -341,7 +341,7 @@ st.markdown(
     /* ── Page title + badges ─────────────────────────────────────────────── */
     .rag-title {
         font-family: var(--serif) !important;
-        font-size: clamp(3rem, 6vw, 5rem) !important;
+        font-size: clamp(2rem, 3vw, 2.5rem) !important;
         font-weight: 400 !important;
         color: var(--ink) !important;
         line-height: 1.05 !important;
