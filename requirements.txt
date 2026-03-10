@@ -6,3 +6,6 @@ google-generativeai
 rank_bm25
 nltk
 scipy
+sentence-transformers
+faiss
+transformers

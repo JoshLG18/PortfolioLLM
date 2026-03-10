@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Josh Le Grice — Professional Portfolio</title>
+<meta name="description" content="Projects and skills by Josh Le Grice — Professional portfolio." />
+<meta name="author" content="Josh Le Grice" />
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+
+<style>
+  :root{
+    /* Light Mode (Default) Variables */
+    --bg:#e3e4e6; --card:#ffffff; --ink:#000000; --muted:#475569;
+    --accent:#5b7cff; --accent2:#7b6cff; --ring:rgba(91,124,255,.35);
+    --radius:16px; --shadow:0 14px 36px rgba(2,6,23,.08);
+    --chip-bg: #fff; --chip-border: rgba(0,0,0,.08);
+    --tag-bg: rgba(0,0,0,.06);
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    --mono: ui-monospace, Menlo, Consolas, Monaco, "Courier New", monospace;
+  }
+
+  /* Dark Mode Variables (Triggered by .dark class) */
+  body.dark {
+    --bg:#0f0f12; --card:#18181b; --ink:#e9eef2; --muted:#9aa7b3; 
+    --shadow:0 14px 36px rgba(0,0,0,.5);
+    --chip-bg: #27272a; --chip-border: rgba(255,255,255,.1);
+    --tag-bg: rgba(255,255,255,.1);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans); transition: background 0.3s ease, color 0.3s ease;}
+
+  .container{max-width:1100px;margin:0 auto;padding:28px 18px 64px}
+
+  /* Top bar */
+  header{display:flex;justify-content:space-between;align-items:center;margin:4px 0 18px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;
+        background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:var(--shadow)}
+  
+  .nav-wrapper { display:flex; align-items:center; gap:20px; }
+  nav a{margin-left:16px;color:inherit;text-decoration:none;font-weight:700;opacity:.9}
+  nav a:hover{opacity:1}
+
+  /* Theme Toggle Button */
+  .theme-btn {
+    background: none; border: none; cursor: pointer; color: var(--ink);
+    padding: 8px; border-radius: 50%; display: grid; place-items: center;
+    transition: background 0.2s;
+  }
+  .theme-btn:hover { background: var(--tag-bg); }
+  .theme-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  
+  /* Icons handling */
+  .moon-icon { display: none; }
+  body.dark .sun-icon { display: none; }
+  body.dark .moon-icon { display: block; }
+
+  /* Hero with profile image */
+  .hero{display:flex;align-items:center;gap:24px;margin-top:10px}
+  .hero img{width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:0 8px 22px rgba(0,0,0,.2)}
+  .hero-card{background:var(--card);border:1px solid rgba(128,128,128,.15);border-radius:var(--radius);box-shadow:var(--shadow);flex:1;padding:26px}
+  h1{font-size:clamp(26px,4.5vw,40px);margin:0 0 6px}
+  .sub{color:var(--muted);margin:0}
+  .cta{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;
+       background:var(--card);border:1px solid rgba(128,128,128,.2);text-decoration:none;color:inherit;font-weight:700; transition: transform 0.1s;}
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff}
+  .statbar{display:flex;gap:16px;margin-top:12px}
+  .stat .k{font-weight:800;font-size:18px}
+  .stat .t{color:var(--muted);font-size:12px}
+
+  /* Sections */
+  section{margin-top:36px}
+  .section-title{display:flex;justify-content:space-between;align-items:end;margin:0 2px 12px}
+  .section-title h2{margin:0;font-size:clamp(20px,3vw,28px)}
+  .muted{color:var(--muted)}
+
+  /* Filters */
+  .filters{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:6px 10px;border-radius:999px;border:1px solid var(--chip-border);background:var(--chip-bg);color:var(--ink);cursor:pointer; transition: background 0.2s;}
+  .chip[aria-pressed="true"]{outline:2px solid var(--ring);background:rgba(91,124,255,.16); color:var(--accent)}
+  
+  /* Project list */
+  .list{display:grid;gap:14px}
+  .item{display:grid;grid-template-columns:260px 1fr;gap:16px;background:var(--card);border:1px solid rgba(128,128,128,.15);
+        border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .thumb{background:linear-gradient(135deg,rgba(91,124,255,.2),rgba(123,108,255,.2));display:grid;place-items:center}
+  .thumb img{width:100%;height:100%;object-fit:fill;aspect-ratio:20/9}
+  @media (max-width:840px){ .item{grid-template-columns:1fr} .thumb img{aspect-ratio:16/10} }
+  .pad{padding:14px 16px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tag{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:999px;background:var(--tag-bg); color:var(--muted);}
+  .view{display:inline-flex;align-items:center;gap:8px;font-weight:800;margin-top:10px;color:var(--accent);text-decoration:none}
+
+  /* Skills */
+  .skills{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media (max-width:980px){ .skills{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:560px){ .skills{grid-template-columns:1fr} }
+  .skill{background:var(--card);border:1px solid rgba(128,128,128,.15);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+  .skill h3{margin:0 0 6px;font-size:14px}
+  .items{color:var(--muted);font-size:13px;line-height:1.6}
+
+  /* Contact */
+  .card{background:var(--card);border:1px solid rgba(128,128,128,.15);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+  footer{margin-top:30px;padding-top:12px;border-top:1px solid rgba(128,128,128,.15);color:var(--muted);font-size:14px}
+  
+  /* Link colors in dark mode need to be clearer */
+  a { color: var(--accent); text-decoration: none; }
+  .card a { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">JLG</div>
+        <strong>Josh Le Grice</strong>
+      </div>
+      
+      <div class="nav-wrapper">
+        <nav aria-label="Primary">
+          <a href="#projects">Projects</a>
+          <a href="#skills">Skills</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        
+        <button class="theme-btn" id="themeToggle" aria-label="Toggle Dark Mode">
+          <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero" id="main">
+      <img src="images/profile.jpeg" alt="Josh Le Grice">
+      <div class="hero-card">
+        <h1>Professional Portfolio</h1>
+        <p class="sub">MSc Data Science student at the University of Exeter. Interests in machine learning, deep learning and quantative engineering in finance.</p>
+        <div class="cta">
+          <a class="btn primary" href="#projects">See projects</a>
+          <a class="btn" href="attachments/LeGriceJoshCV.pdf" target="_blank" rel="noopener">Download CV</a>
+          <a class="btn" href="mailto:joshualegrice@gmail.com">Email me</a>
+        </div>
+        <div class="statbar" aria-label="Quick stats">
+          <div class="stat"><div class="k" id="projCount">8</div><div class="t">Projects</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="section-title">
+        <h2>Featured projects</h2>
+        <div class="filters" role="group" aria-label="Filter projects">
+          <button class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button class="chip" data-filter="ML">ML</button>
+          <button class="chip" data-filter="viz">Visualisation</button>
+          <button class="chip" data-filter="app">App Design</button>
+          <button class="chip" data-filter="LLM">LLM</button>
+          <button class="chip" data-filter="research">Research</button>
+          <button class="chip" data-filter="Database">Database</button>
+          <button class="chip" data-filter="Cloud">Cloud</button>
+          <button class="chip" data-filter="RestAPI">RestAPI</button>
+        </div>
+      </div>
+
+      <div class="list" id="plist">
+        <article class="item" data-tags="LLM app">
+          <div class="thumb">
+            <img src="images/llm.png" alt="Portfolio LLM application">
+          </div>
+          <div class="pad">
+            <strong>Portfolio LLM</strong>
+            <p class="muted" style="margin:6px 0 0">
+                Built an interactive LLM app that indexes my CV and projects, allowing fast retrieval of details about my projects and experiences.            
+            </p>
+            <div class="tags"><span class="tag">Python</span><span class="tag">LLM</span><span class="tag">App&nbsp;Design</span></div>
+            <a class="view" href="https://portfoliollm.streamlit.app/" target="_blank" rel="noopener">Open app →</a>
+          </div>
+        </article>
+        <article class="item" data-tags="ML viz">
+          <div class="thumb">
+            <img src="images/CreditCards.png" alt="Credit Risk Analysis project">
+          </div>
+          <div class="pad">
+            <strong>Predicting Loan Defaults: A Data-Driven Approach to Credit Risk Analysis</strong>
+            <p class="muted" style="margin:6px 0 0">
+              Built credit risk models on real-world data; explored distributions & multicollinearity; trained and compared Logistic Regression, Random Forest, and XGBoost.
+            </p>
+            <div class="tags"><span class="tag">Python</span><span class="tag">ML</span></div>
+            <a class="view" href="https://joshlg18.quarto.pub/predicting-loan-defaults-a-data-driven-approach-to-credit-risk-analysis/" target="_blank" rel="noopener">Read report →</a>
+          </div>
+        </article>
+
+        <article class="item" data-tags="ML viz research">
+          <div class="thumb">
+            <img src="images/DiabetesPred.png" alt="Diabetes prediction study">
+          </div>
+          <div class="pad">
+            <strong>Which factors predict diabetes, and how well can models classify outcomes?</strong>
+            <p class="muted" style="margin:6px 0 0">
+              Study to identify key factors influencing diabetes diagnosis and evaluation of ML models for classification performance.
+            </p>
+            <div class="tags"><span class="tag">Python</span><span class="tag">ML</span><span class="tag">Research</span></div>
+            <a class="view" href="attachments/Coursework.pdf" target="_blank" rel="noopener">Read report →</a>
+          </div>
+        </article>
+
+        <article class="item" data-tags="app viz app">
+          <div class="thumb">
+            <img src="images/app.png" alt="Commercial KPI dashboard app">
+          </div>
+          <div class="pad">
+            <strong>Commercial KPI Dashboard</strong>
+            <p class="muted" style="margin:6px 0 0">
+              Built a web-based KPI dashboard during my internship at Ekimetrics. Semi-automated reporting pipeline — from raw data ingestion and cleaning to interactive Power BI dashboards.
+            </p>
+            <div class="tags"><span class="tag">App Design</span><span class="tag">Viz</span><span class="tag">Python</span></div>
+            <span class="view">Not publicly accessible</span>
+          </div>
+        </article>
+
+        <article class="item" data-tags="research ML">
+          <div class="thumb">
+            <img src="images/diss.png" alt="3rd Year Dissertation">
+          </div>
+          <div class="pad">
+            <strong>The Intersection of Machine Learning and Type 1 Diabetes</strong>
+            <p class="muted" style="margin:6px 0 0">
+                Conducted a critical analysis of machine learning applications in Type 1 diabetes, evaluating predictive models, diagnostic tools, and treatment innovations.
+            </p>
+            <div class="tags"><span class="tag">Research</span><span class="tag">ML</span></div>
+            <a class="view" href="attachments/Dissertation.pdf" target="_blank" rel="noopener">Read report →</a>
+          </div>
+        </article>
+
+        <article class="item" data-tags="research ML">
+          <div class="thumb">
+            <img src="images/FinNews.png" alt="Sentiment Analysis Project">
+          </div>
+          <div class="pad">
+            <strong>Comparative Evaluation of Neural Architectures for Sentiment Analysis</strong>
+            <p class="muted" style="margin:6px 0 0">
+                Evaluated various neural network architectures for sentiment analysis on financial news, comparing MLPs, LSTMs, and Transformer models.
+            </p>
+            <div class="tags"><span class="tag">Research</span><span class="tag">DL</span><span class="tag">NLP</span></div>
+            <a class="view" href="attachments/Report.pdf" target="_blank" rel="noopener">Read report →</a>
+          </div>
+        </article>
+
+        <article class="item" data-tags="research DL MLP">
+          <div class="thumb">
+            <img src="images/MLP.png" alt="MLP Implementation Project">
+          </div>
+          <div class="pad">
+            <strong>Implementation of a Multi-Layer Perceptron for Image Classification</strong>
+            <p class="muted" style="margin:6px 0 0">
+                Designed a complex Multi-Layer Perceptron architecture from scratch using NumPy, achieving comparable ~89% accuracy against a PyTorch implementation.
+            </p>
+            <div class="tags"><span class="tag">Research</span><span class="tag">DL</span><span class="tag">NLP</span></div>
+            <a class="view" href="https://github.com/JoshLG18/Multi-Layer-Perceptron" target="_blank" rel="noopener">GitHub Repository →</a>
+          </div>
+        </article>
+
+        <article class="item" data-tags="Database Cloud RestAPI app">
+          <div class="thumb">
+            <img src="images/agriculture.png" alt="Agriculture Database Project">
+          </div>
+          <div class="pad">
+            <strong>Development of an Agriculture Database Management System</strong>
+            <p class="muted" style="margin:6px 0 0">
+              Engineered a cloud-hosted relational database (Azure SQL) to analyze UK agricultural sustainability. Implemented a normalized (3NF) schema, automated Python data pipelines, and developed a Node.js REST API.
+            </p>
+            <div class="tags"><span class="tag">Database</span><span class="tag">Cloud</span><span class="tag">RestAPI</span> <span class="tag">App Design</span></div>
+            <a class="view" href="https://joshlg18.github.io/Agricultural-Database/" target="_blank" rel="noopener">Database Implementation →</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="section-title">
+        <h2>Technical Skills</h2>
+        <span class="muted">Tools I use regularly</span>
+      </div>
+      <div class="skills">
+        <div class="skill"><h3>Languages</h3><div class="items">Python, C++, SQL , R, Bash, JavaScript, Node.js, HTML, LaTeX</div></div>
+        <div class="skill"><h3>ML / DL</h3><div class="items">PyTorch, Sklearn, Transformers</div></div>
+        <div class="skill"><h3>Data Engineering</h3><div class="items">Pandas, Spark, REST APIs, Express.js</div></div>
+        <div class="skill"><h3>Cloud & Tools</h3><div class="items">Azure, Databricks, Git</div></div>
+        <div class="skill"><h3>Viz</h3><div class="items">PowerBI, Seaborn, Matplotlib, Quarto</div></div>
+        <div class="skill"><h3>IDEs</h3><div class="items">VSCode, RStudio</div></div>
+      </div>
+    </section>
+
+    <section id="certifications">
+      <div class="section-title">
+        <h2>Certifications</h2>
+        <span class="muted">Verified credentials</span>
+      </div>
+      <div class="card" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <img src="images/cert.png" alt="IBM Data Science Certificate" 
+             style="width:120px; height:auto; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.15)">
+        <div>
+          <strong>IBM Data Science Professional Certificate</strong>
+          <p class="muted" style="margin:6px 0 0;">
+            Completed the 12-module certification covering Python, SQL, data visualization, 
+            machine learning, and applied data science. Verified by IBM via Coursera.  
+          </p>
+          <a class="view" href="attachments/IBM Data Science Proffesional Certificate.pdf" target="_blank" rel="noopener">View certificate →</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-title">
+        <h2>Contact</h2>
+        <span class="muted">Let’s work together</span>
+      </div>
+      <div class="card">
+        <p style="margin:0 0 10px">Email is the fastest way to reach me. I’m open to freelance collaborations and full-time roles.</p>
+        <ul style="margin:0; padding-left:18px; line-height:1.9">
+          <li>Email: <a href="mailto:joshualegrice@gmail.com">JoshLeGrice</a></li>
+          <li>GitHub: <a href="https://github.com/JoshLG18" target="_blank" rel="noopener">JoshLG18</a></li>
+          <li>LinkedIn: <a href="https://www.linkedin.com/in/josh-le-grice-aa0223261/" target="_blank" rel="noopener">JoshLeGrice</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> Josh Le Grice • Built with HTML/CSS/JS
+    </footer>
+  </div>
+
+<script>
+  // year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // filters
+  const chips = [...document.querySelectorAll('.chip')];
+  const items = [...document.querySelectorAll('.item')];
+  function setFilter(tag){
+    chips.forEach(c => c.setAttribute('aria-pressed', String(c.dataset.filter===tag)));
+    let visible = 0;
+    items.forEach(it => {
+      const show = (tag==='all') || it.dataset.tags.split(/\s+/).includes(tag);
+      it.style.display = show ? 'grid' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('projCount').textContent = visible;
+  }
+  chips.forEach(ch => ch.addEventListener('click', () => setFilter(ch.dataset.filter)));
+
+  // DARK MODE LOGIC
+  const themeBtn = document.getElementById('themeToggle');
+  const body = document.body;
+
+  // 1. Check for saved user preference, if none, check system preference
+  const savedTheme = localStorage.getItem('theme');
+  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+    body.classList.add('dark');
+  }
+
+  // 2. Toggle on click
+  themeBtn.addEventListener('click', () => {
+    body.classList.toggle('dark');
+    const isDark = body.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+</script>
+</body>
+</html>
