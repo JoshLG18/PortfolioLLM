@@ -845,7 +845,7 @@ if q:
                             unsafe_allow_html=True,
                         )
 
-            with st.expander("📚 Sources"):
+            with st.expander("Sources"):
                 seen_files = []
                 for i, res in enumerate(top, 1):
                     c         = res["chunk"]
