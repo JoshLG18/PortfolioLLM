@@ -216,7 +216,7 @@ DEDUP_COS_THRESH = 0.90 # cosine threshold for near-duplicate filtering
 
 EMBED_MODEL_NAME   = "sentence-transformers/all-MiniLM-L6-v2"
 CROSS_ENCODER_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-GEMINI_MODEL_NAME  = "gemini-2.5-flash"  # only model with free tier quota on this account
+GEMINI_MODEL_NAME  = "gemini-2.5-flash"  # free tier model
 
 DAILY_QUOTA = 20        # Gemini 2.5 Flash free tier: 20 requests per day (RPD)
 RPM_LIMIT   = 5        # free tier: 5 requests per minute — app will warn if exceeded
@@ -535,27 +535,41 @@ def retrieve(query, top_k=FINAL_K):
     return selected
 
 # ----------------------------------------
-# Generation (CW2 §2.6 prompt structure)
+# Generation
 # ----------------------------------------
 def llm_answer(question, retrieved):
     blocks = []
     for i, r in enumerate(retrieved[:TOP_K], 1):
-        txt = r["chunk"]["text"][:1500]
-        blocks.append(f"[{i}] {r['chunk']['title']}\n{txt}")
+        txt = r["chunk"]["text"][:2000]
+        blocks.append(f"[Source {i}] {r['chunk']['title']}\n{txt}")
 
-    # prompt: grounded but allows synthesis across chunks for better answers
+    system = (
+        "You are an expert portfolio assistant for Josh Le Grice, a Computer Science student and developer.\n"
+        "Your job is to give rich, detailed, enthusiastic answers about Josh's work, skills, and experience.\n\n"
+        "Rules:\n"
+        "- Answer fully and in depth — never cut off mid-sentence or give a one-liner\n"
+        "- Synthesise information across all provided sources\n"
+        "- Use markdown formatting: **bold** for key terms, bullet points for lists, headings for long answers\n"
+        "- Cite sources as [1], [2] etc. inline\n"
+        "- Write in third person about Josh (e.g. 'Josh built...', 'His project...')\n"
+        "- If asked about a specific project, cover: what it does, technologies used, motivation, outcomes\n"
+        "- Only say information is unavailable if it is genuinely absent from ALL sources\n"
+    )
+
     prompt = (
-        "You are a knowledgeable assistant presenting someone's professional portfolio.\n"
-        "Use the provided source chunks as your primary reference to answer the question.\n"
-        "Write in clear, professional prose. Use bullet points only for lists of distinct items.\n"
-        "Cite sources inline as [1], [2] etc. Be thorough — if multiple chunks are relevant, synthesise them.\n"
-        "If the answer genuinely cannot be found in the sources, say so briefly.\n\n"
-        f"Question: {question}\n\nSources:\n" + "\n\n".join(blocks) + "\n\nAnswer:"
+        f"{system}\n"
+        f"Question: {question}\n\n"
+        f"Sources:\n" + "\n\n".join(blocks) +
+        "\n\nProvide a thorough, well-structured answer:"
     )
 
     result = _gemini.generate_content(
         prompt,
-        generation_config=genai.types.GenerationConfig(max_output_tokens=1024),
+        generation_config=genai.types.GenerationConfig(
+            max_output_tokens=2048,
+            temperature=0.3,      # low temp = factual and consistent
+            top_p=0.95,
+        ),
     )
     return (result.text or "").strip()
 
@@ -599,22 +613,22 @@ if q:
             # answer rendered via st.markdown so bullet points, bold etc. display correctly
             st.markdown('<div class="section-label">Answer</div>', unsafe_allow_html=True)
             st.markdown(
-                f"""
-                <div style="background:var(--bg-card);border:1px solid var(--border);
-                            border-left:3px solid var(--accent);border-radius:4px;
-                            padding:1rem 1.2rem;margin:0.4rem 0 1rem 0;">
-                </div>
+                """
+                <style>
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stMarkdownContainer"] > .answer-wrap) {
+                    background: var(--bg-card);
+                    border: 1px solid var(--border);
+                    border-left: 3px solid var(--accent);
+                    border-radius: 4px;
+                    padding: 1rem 1.2rem;
+                    margin: 0.4rem 0 1rem 0;
+                }
+                </style>
                 """,
                 unsafe_allow_html=True,
             )
-            # render inside a styled container using native st.markdown for proper markdown support
-            with st.container():
-                st.markdown(
-                    f'<style>.answer-render{{color:var(--text);font-family:var(--font-ui);'
-                    f'font-size:0.92rem;line-height:1.7;}}</style>',
-                    unsafe_allow_html=True,
-                )
-                st.markdown(answer or "_No answer returned._")
+            st.markdown(f'<span class="answer-wrap"></span>', unsafe_allow_html=True)
+            st.markdown(answer or "_No answer returned._")
 
             if SHOW_DIAG:
                 st.markdown('<div class="section-label">Cross-encoder scores</div>', unsafe_allow_html=True)
