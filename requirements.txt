@@ -1,11 +1,10 @@
-streamlit 
-scikit-learn 
-beautifulsoup4 
-pypdf 
+streamlit
+scikit-learn
+beautifulsoup4
+pypdf
 google-generativeai
 rank_bm25
 nltk
 scipy
 sentence-transformers
-faiss
-transformers
+faiss-cpu
