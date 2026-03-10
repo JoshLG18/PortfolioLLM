@@ -169,6 +169,16 @@ st.markdown(
     .source-link { color: var(--text-muted) !important; text-decoration: none !important; font-size: 0.78rem; }
     .source-link:hover { color: var(--accent) !important; }
 
+    /* style native st.markdown answer so bullet points, bold etc. render in theme colours */
+    [data-testid="stMarkdownContainer"] ul { padding-left: 1.2rem; margin: 0.4rem 0; }
+    [data-testid="stMarkdownContainer"] li { color: var(--text) !important; margin-bottom: 0.25rem; line-height: 1.6; }
+    [data-testid="stMarkdownContainer"] strong { color: var(--accent) !important; }
+    [data-testid="stMarkdownContainer"] code {
+        background: var(--bg-panel); color: var(--accent);
+        padding: 0.1rem 0.35rem; border-radius: 3px;
+        font-family: var(--font-mono); font-size: 0.82rem;
+    }
+
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
         color: var(--accent) !important; font-family: var(--font-mono) !important;
         font-size: 0.75rem !important; text-transform: uppercase !important; letter-spacing: 0.1em !important;
@@ -206,7 +216,7 @@ DEDUP_COS_THRESH = 0.90 # cosine threshold for near-duplicate filtering
 
 EMBED_MODEL_NAME   = "sentence-transformers/all-MiniLM-L6-v2"
 CROSS_ENCODER_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-GEMINI_MODEL_NAME  = "gemini-2.5-flash"  # only model with free tier quota on this account
+GEMINI_MODEL_NAME  = "gemini-2.5-flash-preview-05-20"  # only model with free tier quota on this account
 
 DAILY_QUOTA = 20        # Gemini 2.5 Flash free tier: 20 requests per day (RPD)
 RPM_LIMIT   = 5        # free tier: 5 requests per minute — app will warn if exceeded
@@ -530,23 +540,24 @@ def retrieve(query, top_k=FINAL_K):
 def llm_answer(question, retrieved):
     blocks = []
     for i, r in enumerate(retrieved[:TOP_K], 1):
-        txt = r["chunk"]["text"][:1500]  # larger chunks need more chars to preserve full content
+        txt = r["chunk"]["text"][:1500]
         blocks.append(f"[{i}] {r['chunk']['title']}\n{txt}")
 
-    # strict grounding prompt — mirrors CW2 rag_prompt design
+    # prompt: grounded but allows synthesis across chunks for better answers
     prompt = (
-        "You are a helpful and precise question-answering assistant about this portfolio.\n"
-        "Answer the question using ONLY the provided source chunks below.\n"
-        "Be concise and factual. Always cite relevant sources as [1], [2], etc.\n"
-        "If the answer is not present in the sources, say: 'I could not find that in the available documents.'\n\n"
+        "You are a knowledgeable assistant presenting someone's professional portfolio.\n"
+        "Use the provided source chunks as your primary reference to answer the question.\n"
+        "Write in clear, professional prose. Use bullet points only for lists of distinct items.\n"
+        "Cite sources inline as [1], [2] etc. Be thorough — if multiple chunks are relevant, synthesise them.\n"
+        "If the answer genuinely cannot be found in the sources, say so briefly.\n\n"
         f"Question: {question}\n\nSources:\n" + "\n\n".join(blocks) + "\n\nAnswer:"
     )
 
-    r = _gemini.generate_content(
+    result = _gemini.generate_content(
         prompt,
         generation_config=genai.types.GenerationConfig(max_output_tokens=1024),
     )
-    return (r.text or "").strip()
+    return (result.text or "").strip()
 
 # ----------------------------------------
 # UI
@@ -585,8 +596,25 @@ if q:
             with st.spinner("Generating answer…"):
                 answer = llm_answer(q, top)
 
+            # answer rendered via st.markdown so bullet points, bold etc. display correctly
             st.markdown('<div class="section-label">Answer</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="answer-card">{answer or "_No answer returned._"}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f"""
+                <div style="background:var(--bg-card);border:1px solid var(--border);
+                            border-left:3px solid var(--accent);border-radius:4px;
+                            padding:1rem 1.2rem;margin:0.4rem 0 1rem 0;">
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            # render inside a styled container using native st.markdown for proper markdown support
+            with st.container():
+                st.markdown(
+                    f'<style>.answer-render{{color:var(--text);font-family:var(--font-ui);'
+                    f'font-size:0.92rem;line-height:1.7;}}</style>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(answer or "_No answer returned._")
 
             if SHOW_DIAG:
                 st.markdown('<div class="section-label">Cross-encoder scores</div>', unsafe_allow_html=True)
@@ -612,14 +640,21 @@ if q:
                             unsafe_allow_html=True,
                         )
 
+            # sources — show clean filename only, not the full /docs/... path
             with st.expander("📚 Sources"):
+                seen_files = []
                 for i, r in enumerate(top, 1):
-                    c = r["chunk"]
+                    c         = r["chunk"]
+                    fname     = os.path.basename(c["href"])
+                    # strip chunk suffix from title for a clean display name
+                    doc_title = c["title"].split(" — chunk")[0]
+                    if fname not in seen_files:
+                        seen_files.append(fname)
                     st.markdown(
                         f"""<div class="source-row">
                                 <span class="source-idx">[{i}]</span>
-                                <span style="color:var(--text);font-size:0.82rem;">{c["title"]}</span>
-                                <a class="source-link" href="{c["href"]}">{c["href"]}</a>
+                                <span style="color:var(--text);font-size:0.82rem;font-weight:600;">{doc_title}</span>
+                                <span style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.72rem;margin-left:auto;">{fname}</span>
                             </div>""",
                         unsafe_allow_html=True,
                     )
