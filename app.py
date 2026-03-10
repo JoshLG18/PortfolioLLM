@@ -206,7 +206,7 @@ DEDUP_COS_THRESH = 0.90 # cosine threshold for near-duplicate filtering
 
 EMBED_MODEL_NAME   = "sentence-transformers/all-MiniLM-L6-v2"
 CROSS_ENCODER_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-GEMINI_MODEL_NAME  = "gemini-2.5-flash-preview-05-20"  # only model with free tier quota on this account
+GEMINI_MODEL_NAME  = "gemini-2.5-flash"  # only model with free tier quota on this account
 
 DAILY_QUOTA = 20        # Gemini 2.5 Flash free tier: 20 requests per day (RPD)
 RPM_LIMIT   = 5        # free tier: 5 requests per minute — app will warn if exceeded
