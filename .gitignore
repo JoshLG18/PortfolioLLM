@@ -1,2 +1,15 @@
 .streamlit/
+# Environments
+.venv/
+.venv-intel/
+.venv-m5/
+
+# Python junk
+__pycache__/
+*.py[cod]
+
+# Security
 .env
+
+# System
+.DS_Store
