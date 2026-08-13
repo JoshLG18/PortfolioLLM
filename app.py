@@ -35,18 +35,24 @@ def _img_to_b64(path: str) -> str:
     try:
         with open(path, "rb") as f:
             data = base64.b64encode(f.read()).decode()
-        ext  = os.path.splitext(path)[1].lstrip(".").lower()
-        mime = {"jpg": "jpeg", "jpeg": "jpeg", "png": "png",
-                "gif": "gif", "webp": "webp"}.get(ext, "jpeg")
+        ext = os.path.splitext(path)[1].lstrip(".").lower()
+        mime = {
+            "jpg": "jpeg",
+            "jpeg": "jpeg",
+            "png": "png",
+            "gif": "gif",
+            "webp": "webp",
+        }.get(ext, "jpeg")
         return f"data:image/{mime};base64,{data}"
     except Exception:
         return ""
 
+
 PROFILE_IMG = _img_to_b64("attachments/profile.jpeg")
 PROFILE_TAG = (
     f'<img class="hero-photo" src="{PROFILE_IMG}" alt="Josh Le Grice" />'
-    if PROFILE_IMG else
-    '<div class="hero-photo-placeholder">JLG</div>'
+    if PROFILE_IMG
+    else '<div class="hero-photo-placeholder">JLG</div>'
 )
 
 # ── GLOBAL CSS ────────────────────────────────────────────────────────────────
@@ -400,38 +406,39 @@ st.markdown(
 )
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-CHUNK_WORDS       = 800
-CHUNK_OVERLAP_W   = 100
+CHUNK_WORDS = 800
+CHUNK_OVERLAP_W = 100
 MIN_CHARS_DEFAULT = 60
 
-W_DENSE  = 0.50
+W_DENSE = 0.50
 W_SPARSE = 0.30
-W_BM25   = 0.20
+W_BM25 = 0.20
 
 DENSE_CANDIDATES = 64
-FINAL_POOL       = 32
-FINAL_K          = 6
+FINAL_POOL = 32
+FINAL_K = 6
 DEDUP_COS_THRESH = 0.90
 
-EMBED_MODEL_NAME   = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 CROSS_ENCODER_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-GEMINI_MODEL_NAME  = "gemini-2.5-flash"
+GEMINI_MODEL_NAME = "gemini-2.5-flash"
 
 DAILY_QUOTA = 20
-RPM_LIMIT   = 5
-QUOTA_FILE  = ".gemini_quota.json"
+RPM_LIMIT = 5
+QUOTA_FILE = ".gemini_quota.json"
 
 SYNONYM_MAP = {
-    "cv":           ["resume", "résumé"],
-    "llm":          ["language model", "genai", "foundation model"],
-    "genai":        ["generative ai", "foundation model"],
-    "streamlit":    ["python web app", "web app"],
-    "nlp":          ["natural language processing"],
-    "retrieval":    ["rag", "document search"],
-    "rag":          ["retrieval augmented generation", "retrieval"],
-    "internship":   ["placement"],
+    "cv": ["resume", "résumé"],
+    "llm": ["language model", "genai", "foundation model"],
+    "genai": ["generative ai", "foundation model"],
+    "streamlit": ["python web app", "web app"],
+    "nlp": ["natural language processing"],
+    "retrieval": ["rag", "document search"],
+    "rag": ["retrieval augmented generation", "retrieval"],
+    "internship": ["placement"],
     "dissertation": ["The Intersection of Machine Learning and Type 1 Diabetes"],
 }
+
 
 # ── QUOTA HELPERS ─────────────────────────────────────────────────────────────
 def _load_quota():
@@ -446,8 +453,10 @@ def _load_quota():
         pass
     return {"date": today, "count": 0}
 
+
 def remaining_quota():
     return max(0, DAILY_QUOTA - _load_quota()["count"])
+
 
 def increment_quota():
     data = _load_quota()
@@ -461,16 +470,17 @@ def increment_quota():
         pass
     return True
 
+
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown('<div class="sb-heading">⚙ Settings</div>', unsafe_allow_html=True)
-    TOP_K       = st.slider("Top-k chunks", 1, 10, FINAL_K)
+    TOP_K = st.slider("Top-k chunks", 1, 10, FINAL_K)
     SHOW_CHUNKS = st.checkbox("Show retrieved chunks", False)
-    SHOW_DIAG   = st.checkbox("Show CE score metrics", False)
+    SHOW_DIAG = st.checkbox("Show CE score metrics", False)
 
     st.markdown('<div class="sb-heading">◈ Daily Quota</div>', unsafe_allow_html=True)
-    rem     = remaining_quota()
-    pct     = int(rem / DAILY_QUOTA * 100)
+    rem = remaining_quota()
+    pct = int(rem / DAILY_QUOTA * 100)
     bar_col = "var(--gold)" if pct > 30 else "var(--red)"
     st.markdown(
         f"""
@@ -504,17 +514,15 @@ st.markdown(
         <div style="flex:1;min-width:0;">
             <div class="hero-eyebrow">MSc Data Science · University of Exeter</div>
             <div class="hero-name">Josh Le Grice</div>
-            <div class="hero-sub">Quantitative developer and data scientist focused on machine
-            learning, deep learning, and financial modelling.</div>
+            <div class="hero-sub">Data Engineer and Software Engineer specialzing in scalable financial systems, Python, and C++.</div>
             <div style="margin-bottom:14px;">
                 <a class="hero-btn outline"
                    href="https://joshlg18.github.io/PortfolioWebsite/"
                    target="_blank" rel="noopener">View Projects ↗</a>
             </div>
             <div class="statbar">
-                <div class="stat"><div class="k">9</div><div class="t">Projects</div></div>
-                <div class="stat"><div class="k">3</div><div class="t">Featured</div></div>
-                <div class="stat"><div class="k">1</div><div class="t">Internship</div></div>
+                <div class="stat"><div class="k">13</div><div class="t">Projects</div></div>
+                <div class="stat"><div class="k">4</div><div class="t">Featured</div></div>
             </div>
         </div>
     </div>
@@ -522,7 +530,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<div class="rule"><div class="rule-diamond"></div></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="rule"><div class="rule-diamond"></div></div>', unsafe_allow_html=True
+)
 
 # ── RAG TITLE ────────────────────────────────────────────────────────────────
 st.markdown(
@@ -534,6 +544,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 # ── TEXT EXTRACTION ───────────────────────────────────────────────────────────
 def _extract_text_pdf(path):
     out = []
@@ -542,24 +553,32 @@ def _extract_text_pdf(path):
             out.append(page.extract_text() or "")
     return "\n".join(out)
 
+
 def _extract_text_html(path):
     with open(path, encoding="utf-8", errors="ignore") as f:
-        return BeautifulSoup(f.read(), "html.parser").get_text(separator="\n", strip=True)
+        return BeautifulSoup(f.read(), "html.parser").get_text(
+            separator="\n", strip=True
+        )
+
 
 def _extract_text_md(path):
     with open(path, encoding="utf-8", errors="ignore") as f:
         return f.read()
 
+
 EXTRACTORS = {
-    ".pdf":      _extract_text_pdf,
-    ".html":     _extract_text_html,
-    ".htm":      _extract_text_html,
-    ".md":       _extract_text_md,
+    ".pdf": _extract_text_pdf,
+    ".html": _extract_text_html,
+    ".htm": _extract_text_html,
+    ".md": _extract_text_md,
     ".markdown": _extract_text_md,
 }
 
+
 # ── CHUNKING ──────────────────────────────────────────────────────────────────
-def chunk_text_words(text, chunk_size=CHUNK_WORDS, overlap=CHUNK_OVERLAP_W, min_chars=60):
+def chunk_text_words(
+    text, chunk_size=CHUNK_WORDS, overlap=CHUNK_OVERLAP_W, min_chars=60
+):
     words = text.split()
     if len(words) <= chunk_size:
         return [text] if len(text) >= min_chars else []
@@ -572,8 +591,9 @@ def chunk_text_words(text, chunk_size=CHUNK_WORDS, overlap=CHUNK_OVERLAP_W, min_
             break
     return chunks
 
+
 def file_to_chunks(path, min_chars):
-    ext  = os.path.splitext(path)[1].lower()
+    ext = os.path.splitext(path)[1].lower()
     text = EXTRACTORS[ext](path)
     base = os.path.basename(path)
     return [
@@ -581,11 +601,15 @@ def file_to_chunks(path, min_chars):
         for i, ch in enumerate(chunk_text_words(text, min_chars=min_chars))
     ]
 
+
 # ── LOAD DOCS ─────────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Chunking documents…")
 def load_chunks(min_chars):
-    fps = [fp for fp in glob.glob("docs/*")
-           if os.path.splitext(fp)[1].lower() in EXTRACTORS]
+    fps = [
+        fp
+        for fp in glob.glob("docs/*")
+        if os.path.splitext(fp)[1].lower() in EXTRACTORS
+    ]
     chunks, errors = [], []
     for fp in fps:
         try:
@@ -593,6 +617,7 @@ def load_chunks(min_chars):
         except Exception as e:
             errors.append(f"{os.path.basename(fp)}: {e}")
     return fps, chunks, errors
+
 
 # placeholder shown while indexes build — replaced with green READY after all @cache calls complete
 status_placeholder = st.empty()
@@ -611,7 +636,7 @@ with doc_placeholder.container():
                 f'<div class="doc-row">'
                 f'<span class="doc-bullet">▸</span>'
                 f'<span class="doc-name">{os.path.basename(fp)}</span>'
-                f'</div>',
+                f"</div>",
                 unsafe_allow_html=True,
             )
     else:
@@ -626,8 +651,8 @@ with doc_placeholder.container():
 if not chunks:
     st.markdown(
         '<div class="answer-card" style="border-left-color:var(--red);">'
-        'Add <code>.pdf</code> / <code>.html</code> / <code>.md</code> '
-        'files to <code>/docs</code> and reload.</div>',
+        "Add <code>.pdf</code> / <code>.html</code> / <code>.md</code> "
+        "files to <code>/docs</code> and reload.</div>",
         unsafe_allow_html=True,
     )
     st.stop()
@@ -639,16 +664,41 @@ if errors:
 
 # ── SPARSE INDEX ──────────────────────────────────────────────────────────────
 TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
-stemmer  = SnowballStemmer("english")
+stemmer = SnowballStemmer("english")
+
 
 def stem_analyzer(text):
     return [stemmer.stem(t) for t in TOKEN_RE.findall(text.lower()) if len(t) > 1]
 
+
 @st.cache_resource(show_spinner="Building sparse index…")
 def build_sparse_index(texts, titles):
-    vw = TfidfVectorizer(analyzer=stem_analyzer, ngram_range=(1,2), sublinear_tf=True, min_df=2, max_df=0.9,  norm="l2", lowercase=False)
-    vc = TfidfVectorizer(analyzer="char",         ngram_range=(3,5), sublinear_tf=True, min_df=2, max_df=0.95, norm="l2")
-    vt = TfidfVectorizer(analyzer=stem_analyzer, ngram_range=(1,2), sublinear_tf=True, min_df=1, max_df=0.95, norm="l2", lowercase=False)
+    vw = TfidfVectorizer(
+        analyzer=stem_analyzer,
+        ngram_range=(1, 2),
+        sublinear_tf=True,
+        min_df=2,
+        max_df=0.9,
+        norm="l2",
+        lowercase=False,
+    )
+    vc = TfidfVectorizer(
+        analyzer="char",
+        ngram_range=(3, 5),
+        sublinear_tf=True,
+        min_df=2,
+        max_df=0.95,
+        norm="l2",
+    )
+    vt = TfidfVectorizer(
+        analyzer=stem_analyzer,
+        ngram_range=(1, 2),
+        sublinear_tf=True,
+        min_df=1,
+        max_df=0.95,
+        norm="l2",
+        lowercase=False,
+    )
     Xw = vw.fit_transform(texts)
     Xc = vc.fit_transform(texts)
     Xt = vt.fit_transform(titles) * 2.0
@@ -656,32 +706,43 @@ def build_sparse_index(texts, titles):
     bm = BM25Okapi([stem_analyzer(t) for t in texts])
     return vw, vc, vt, Xs, bm
 
+
 vec_word, vec_char, vec_title, X_sparse, bm25 = build_sparse_index(
     [c["text"] for c in chunks], [c["title"] for c in chunks]
 )
 
+
 # ── DENSE FAISS INDEX ─────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="Building dense FAISS index…")
 def build_dense_index(texts):
-    emb  = SentenceTransformer(EMBED_MODEL_NAME)
-    vecs = emb.encode(texts, batch_size=64, show_progress_bar=False,
-                      normalize_embeddings=True, convert_to_numpy=True).astype("float32")
-    idx  = faiss.IndexFlatIP(vecs.shape[1])
+    emb = SentenceTransformer(EMBED_MODEL_NAME)
+    vecs = emb.encode(
+        texts,
+        batch_size=64,
+        show_progress_bar=False,
+        normalize_embeddings=True,
+        convert_to_numpy=True,
+    ).astype("float32")
+    idx = faiss.IndexFlatIP(vecs.shape[1])
     idx.add(vecs)
     return emb, idx, vecs
 
+
 embedder, faiss_index, chunk_vecs = build_dense_index([c["text"] for c in chunks])
+
 
 # ── CROSS-ENCODER ─────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="Loading cross-encoder…")
 def load_cross_encoder():
     return CrossEncoder(CROSS_ENCODER_NAME)
 
+
 cross_encoder = load_cross_encoder()
 
 # All indexes loaded — update status strip to green READY
 status_placeholder.markdown(
-    '<div class="status-strip"><span class="rag-badge b-green" '    'style="font-size:.78rem;padding:.25rem .8rem;letter-spacing:.1em;">● &nbsp;READY</span></div>',
+    '<div class="status-strip"><span class="rag-badge b-green" '
+    'style="font-size:.78rem;padding:.25rem .8rem;letter-spacing:.1em;">● &nbsp;READY</span></div>',
     unsafe_allow_html=True,
 )
 
@@ -690,7 +751,7 @@ api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     st.markdown(
         '<div class="answer-card" style="border-left-color:var(--red);">'
-        'Missing <code>GEMINI_API_KEY</code> in <code>.streamlit/secrets.toml</code></div>',
+        "Missing <code>GEMINI_API_KEY</code> in <code>.streamlit/secrets.toml</code></div>",
         unsafe_allow_html=True,
     )
     st.stop()
@@ -698,10 +759,12 @@ if not api_key:
 genai.configure(api_key=api_key)
 _gemini = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
+
 # ── RETRIEVAL ─────────────────────────────────────────────────────────────────
 def _minmax(v):
     lo, hi = v.min(), v.max()
     return np.zeros_like(v) if (hi - lo) < 1e-9 else (v - lo) / (hi - lo)
+
 
 def expand_query(q, prf_titles):
     extras = []
@@ -714,31 +777,38 @@ def expand_query(q, prf_titles):
         expanded += " " + " ".join(prf_titles[:2])
     return expanded
 
-def retrieve(query, top_k=FINAL_K):
-    n          = len(chunks)
-    bm_scores  = bm25.get_scores(stem_analyzer(query))
-    prf_titles = [chunks[i]["title"] for i in bm_scores.argsort()[::-1][:10]]
-    qx         = expand_query(query, prf_titles)
 
-    q_emb = embedder.encode([qx], normalize_embeddings=True, convert_to_numpy=True).astype("float32")
+def retrieve(query, top_k=FINAL_K):
+    n = len(chunks)
+    bm_scores = bm25.get_scores(stem_analyzer(query))
+    prf_titles = [chunks[i]["title"] for i in bm_scores.argsort()[::-1][:10]]
+    qx = expand_query(query, prf_titles)
+
+    q_emb = embedder.encode(
+        [qx], normalize_embeddings=True, convert_to_numpy=True
+    ).astype("float32")
     d_scores, d_idxs = faiss_index.search(q_emb, min(DENSE_CANDIDATES, n))
     s_dense = np.zeros(n, dtype=float)
     for s, i in zip(d_scores[0], d_idxs[0]):
         if 0 <= i < n:
             s_dense[i] = float(s)
 
-    qw       = vec_word.transform([qx])
-    qc       = vec_char.transform([qx])
-    qt       = vec_title.transform([qx]) * 2.0
+    qw = vec_word.transform([qx])
+    qc = vec_char.transform([qx])
+    qt = vec_title.transform([qx]) * 2.0
     s_sparse = cosine_similarity(hstack([qw, qc, qt], format="csr"), X_sparse).ravel()
-    s_bm25   = bm25.get_scores(stem_analyzer(qx)).astype(float)
+    s_bm25 = bm25.get_scores(stem_analyzer(qx)).astype(float)
 
-    score     = W_DENSE*_minmax(s_dense) + W_SPARSE*_minmax(s_sparse) + W_BM25*_minmax(s_bm25)
+    score = (
+        W_DENSE * _minmax(s_dense)
+        + W_SPARSE * _minmax(s_sparse)
+        + W_BM25 * _minmax(s_bm25)
+    )
     pool_idxs = list(score.argsort()[::-1][:FINAL_POOL])
 
-    pairs     = [[query, chunks[i]["text"][:800]] for i in pool_idxs]
+    pairs = [[query, chunks[i]["text"][:800]] for i in pool_idxs]
     ce_scores = cross_encoder.predict(pairs, batch_size=32, show_progress_bar=False)
-    ranked    = sorted(zip(pool_idxs, ce_scores), key=lambda x: x[1], reverse=True)
+    ranked = sorted(zip(pool_idxs, ce_scores), key=lambda x: x[1], reverse=True)
 
     selected, seen_vecs = [], []
     for idx, ce_score in ranked:
@@ -746,10 +816,13 @@ def retrieve(query, top_k=FINAL_K):
             break
         v = chunk_vecs[idx]
         if not any(float(np.dot(v, sv)) >= DEDUP_COS_THRESH for sv in seen_vecs):
-            selected.append({"chunk": chunks[idx], "ce_score": float(ce_score), "idx": idx})
+            selected.append(
+                {"chunk": chunks[idx], "ce_score": float(ce_score), "idx": idx}
+            )
             seen_vecs.append(v)
 
     return selected
+
 
 # ── GENERATION ────────────────────────────────────────────────────────────────
 def llm_answer(question, retrieved):
@@ -777,8 +850,9 @@ def llm_answer(question, retrieved):
     prompt = (
         f"{system}\n"
         f"Question: {question}\n\n"
-        f"Sources:\n" + "\n\n".join(blocks) +
-        "\n\nProvide a thorough, well-structured answer:"
+        f"Sources:\n"
+        + "\n\n".join(blocks)
+        + "\n\nProvide a thorough, well-structured answer:"
     )
 
     result = _gemini.generate_content(
@@ -786,6 +860,7 @@ def llm_answer(question, retrieved):
         generation_config=genai.types.GenerationConfig(temperature=0.3, top_p=0.95),
     )
     return (result.text or "").strip()
+
 
 # ── QUERY UI ─────────────────────────────────────────────────────────────────
 st.markdown('<div class="section-label">Query</div>', unsafe_allow_html=True)
@@ -803,15 +878,17 @@ if q:
         if not increment_quota():
             st.markdown(
                 f'<div class="answer-card" style="border-left-color:var(--red);">'
-                f'Daily quota of {DAILY_QUOTA} requests reached '
-                f'(Gemini 2.5 Flash free tier: 20 RPD). Resets tomorrow.</div>',
+                f"Daily quota of {DAILY_QUOTA} requests reached "
+                f"(Gemini 2.5 Flash free tier: 20 RPD). Resets tomorrow.</div>",
                 unsafe_allow_html=True,
             )
         else:
             with st.spinner("Generating answer…"):
                 answer = llm_answer(q, top)
 
-            st.markdown('<div class="section-label">Answer</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="section-label">Answer</div>', unsafe_allow_html=True
+            )
             st.markdown(
                 """<style>
                 div[data-testid="stVerticalBlock"]:has(>div[data-testid="stMarkdownContainer"]>.answer-wrap) {
@@ -829,7 +906,10 @@ if q:
             st.markdown(answer or "_No answer returned._")
 
             if SHOW_DIAG:
-                st.markdown('<div class="section-label">Cross-Encoder Scores</div>', unsafe_allow_html=True)
+                st.markdown(
+                    '<div class="section-label">Cross-Encoder Scores</div>',
+                    unsafe_allow_html=True,
+                )
                 cols = st.columns(min(len(top), 8))
                 for col, r in zip(cols, top):
                     col.metric(
@@ -840,8 +920,12 @@ if q:
             if SHOW_CHUNKS:
                 with st.expander("Retrieved Chunks"):
                     for i, r in enumerate(top, 1):
-                        ce    = r["ce_score"]
-                        color = "var(--green)" if ce > 5 else "var(--gold)" if ce > 0 else "var(--muted)"
+                        ce = r["ce_score"]
+                        color = (
+                            "var(--green)"
+                            if ce > 5
+                            else "var(--gold)" if ce > 0 else "var(--muted)"
+                        )
                         st.markdown(
                             f"""<div class="chunk-card">
                                 <div>
@@ -859,8 +943,8 @@ if q:
             with st.expander("Sources"):
                 seen_files = []
                 for i, res in enumerate(top, 1):
-                    c         = res["chunk"]
-                    fname     = os.path.basename(c["href"])
+                    c = res["chunk"]
+                    fname = os.path.basename(c["href"])
                     doc_title = c["title"].split(" — chunk")[0]
                     if fname in seen_files:
                         continue
@@ -873,7 +957,7 @@ if q:
                         f'<span style="color:var(--ink);font-size:.86rem;font-weight:500;">{safe_title}</span>'
                         f'<span style="color:var(--muted);font-family:var(--mono);'
                         f'font-size:.69rem;margin-left:auto;">{safe_fname}</span>'
-                        f'</div>',
+                        f"</div>",
                         unsafe_allow_html=True,
                     )
 
