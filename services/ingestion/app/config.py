@@ -1,6 +1,7 @@
 import os
 
 CHUNK_WORDS = 800
+MIN_CHARS = 60
 CHUNK_OVERLAP_WORDS = 100
 
 EMBED_MODEL_NAME = os.environ.get(
@@ -13,8 +14,8 @@ GITHUB_CACHE_TTL_SECONDS = int(os.environ.get("GITHUB_CACHE_TTL_SECONDS", "21600
 
 PORTFOLIO_WEBSITE_REPO = os.environ.get("PORTFOLIO_WEBSITE_REPO", "JoshLG18/PortfolioWebsite")
 PORTFOLIO_WEBSITE_BRANCH = os.environ.get("PORTFOLIO_WEBSITE_BRANCH", "main")
+PORTFOLIO_ATTACHMENTS_PATH = os.environ.get("PORTFOLIO_ATTACHMENTS_PATH", "attachments")
 
-LOCAL_DOCS_DIR = os.environ.get("LOCAL_DOCS_DIR", "/app/docs")
 INDEX_DATA_DIR = os.environ.get("INDEX_DATA_DIR", "/data/index")
 GITHUB_CACHE_DIR = os.environ.get("GITHUB_CACHE_DIR", "/data/cache")
 
