@@ -1,0 +1,12 @@
+/* TODO: migrate design tokens from app.py:64-88 and component classes from
+   app.py:296-402. The <header> itself is rendered from fetched markup/CSS
+   (see Header.tsx + /api/header) rather than hardcoded here. */
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}

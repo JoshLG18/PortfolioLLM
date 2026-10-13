@@ -1,0 +1,63 @@
+services:
+  ingestion:
+    build: ./services/ingestion
+    expose:
+      - "8000"
+    volumes:
+      - ./docs:/app/docs:ro
+      - index_data:/data/index
+      - github_cache:/data/cache
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPOS=${GITHUB_REPOS}
+      - PORTFOLIO_WEBSITE_REPO=${PORTFOLIO_WEBSITE_REPO}
+      - PORTFOLIO_WEBSITE_BRANCH=${PORTFOLIO_WEBSITE_BRANCH}
+      - GITHUB_CACHE_TTL_SECONDS=${GITHUB_CACHE_TTL_SECONDS}
+      - EMBED_MODEL_NAME=${EMBED_MODEL_NAME}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  search:
+    build: ./services/search
+    expose:
+      - "8000"
+    volumes:
+      - index_data:/data/index:ro
+    environment:
+      - EMBED_MODEL_NAME=${EMBED_MODEL_NAME}
+      - GENERATION_SERVICE_URL=http://generation:8000
+    depends_on:
+      ingestion:
+        condition: service_healthy
+
+  generation:
+    build: ./services/generation
+    expose:
+      - "8000"
+    volumes:
+      - quota_data:/data/quota
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DAILY_QUOTA=${DAILY_QUOTA}
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - INGESTION_SERVICE_URL=http://ingestion:8000
+      - SEARCH_SERVICE_URL=http://search:8000
+      - GENERATION_SERVICE_URL=http://generation:8000
+    depends_on:
+      - ingestion
+      - search
+      - generation
+
+volumes:
+  index_data:
+  github_cache:
+  quota_data:
